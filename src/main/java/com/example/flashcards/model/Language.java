@@ -1,6 +1,8 @@
 package com.example.flashcards.model;
 
+import lombok.Builder;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 //import org.checkerframework.common.aliasing.qual.Unique;
 
@@ -11,9 +13,11 @@ import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.List;
 
+@Builder
 @Getter
 @Setter
 @Entity
+@RequiredArgsConstructor
 @Table(name = "language")
 public class Language implements Serializable {
     @Id

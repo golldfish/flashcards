@@ -21,15 +21,15 @@ public class UserValidator {
 
     public void isRegisterUserValid(final UserDto userDto) {
         if (! isUsernameValid(userDto.getUsername())) {
-            throw new BadRequestException("Invalid data");
+            throw new BadRequestException();
         }
 
         if (! isEmailValid(userDto.getEmail())) {
-            throw new BadRequestException("Invalid data");
+            throw new BadRequestException();
         }
 
         if (! isPasswordValid(userDto.getPassword())) {
-            throw new BadRequestException("Invalid data");
+            throw new BadRequestException();
         }
 
         validatePasswords(userDto.getPassword(), userDto.getRepeatPassword());
@@ -37,19 +37,19 @@ public class UserValidator {
 
     public void comparePasswordToDb(final String inputtedPassword, final String dbPassword) {
         if (! BCrypt.checkpw(inputtedPassword, dbPassword)) {
-            throw new BadRequestException("Invalid data");
+            throw new BadRequestException();
         }
     }
 
     public void compareOldAndNewPassword(final String oldPasswd, final String newPasswd) {
         if (doPasswordsMatch(oldPasswd, newPasswd)) {
-            throw new BadRequestException("Invalid data");
+            throw new BadRequestException();
         }
     }
 
     public void validatePasswords(final String passwd1, final String passwd2) {
         if (! doPasswordsMatch(passwd1, passwd2)) {
-            throw new BadRequestException("Invalid data");
+            throw new BadRequestException();
         }
     }
 

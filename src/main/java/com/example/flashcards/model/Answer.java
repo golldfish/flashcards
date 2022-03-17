@@ -20,7 +20,7 @@ public class Answer implements Serializable {
 
     @NotBlank
     @NotNull
-    private String name;
+    private String value;
 
     @OneToOne(mappedBy = "answer")
     private Flashcard flashcard;
