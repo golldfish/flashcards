@@ -43,15 +43,14 @@ public class UserController {
 
     @PutMapping(value = "/user", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(OK)
-    Map<String, String> updatePasswordForUser(final Authentication authentication,
-                                              @RequestBody UserPasswordDto userPasswordDto) {
+    void updatePasswordForUser(final Authentication authentication, @RequestBody UserPasswordDto userPasswordDto) {
 
-        return userService.changePassword(authentication.getName(), userPasswordDto);
+        userService.changePassword(authentication.getName(), userPasswordDto);
     }
 
     @GetMapping(value = "/user", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(OK)
-    Map<String, String> login(final Authentication authentication) {
-        return userService.login(authentication.getName());
+    Map<String, String> getUserByUsername(final Authentication authentication) {
+        return userService.getUserByUsername(authentication.getName());
     }
 }

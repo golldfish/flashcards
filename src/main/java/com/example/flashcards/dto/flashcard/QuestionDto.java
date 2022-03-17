@@ -12,13 +12,13 @@ import lombok.Value;
 @RequiredArgsConstructor
 public class QuestionDto {
 
-    String name;
+    String value;
     String langCode;
 
     public static QuestionDto createFrom(final Question question) {
         return QuestionDto.builder()
                 .langCode(question.getLanguage().getLangCode())
-                .name(question.getValue())
+                .value(question.getValue())
                 .build();
     }
 }

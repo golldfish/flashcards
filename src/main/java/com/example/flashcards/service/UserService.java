@@ -19,7 +19,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.HashMap;
 import java.util.Map;
 
 @Service
@@ -49,7 +48,7 @@ public class UserService {
         });
     }
 
-    public Map<String, String> changePassword(final String username, final UserPasswordDto userPasswordDto){
+    public void changePassword(final String username, final UserPasswordDto userPasswordDto) {
         final User user = userRepository.findUserByUsername(username).orElseThrow(NotFoundException::new);
         userValidator.comparePasswordToDb(userPasswordDto.getOldPassword(), user.getPassword());
         userValidator.compareOldAndNewPassword(userPasswordDto.getOldPassword(), userPasswordDto.getPassword());
@@ -57,8 +56,6 @@ public class UserService {
         userPasswordDto.setPassword(passwordEncoder.encode(userPasswordDto.getPassword()));
         user.setPassword(userPasswordDto.getPassword());
         userRepository.save(user);
-
-        return Map.of("username", user.getUsername(), "email", user.getEmail(), "role", user.getRole());
     }
 
     public Map<String, String> createAuthenticationToken(final JwtRequest authenticationRequest) throws Exception {
@@ -66,15 +63,11 @@ public class UserService {
         final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getUsername());
         final User user = userRepository.findUserByUsername(authenticationRequest.getUsername())
                 .orElseThrow(NotFoundException::new);
-        Map<String, String> body = new HashMap<>();
-        body.put("username", user.getUsername());
-        body.put("email", user.getEmail());
-        body.put("role", user.getRole());
-        body.put("token", jwtTokenUtil.generateToken(userDetails));
-        return body;
+        return Map.of("username", user.getUsername(), "email", user.getEmail(), "token",
+                jwtTokenUtil.generateToken(userDetails));
     }
 
-    public Map<String, String> login(final String username) throws NotFoundException {
+    public Map<String, String> getUserByUsername(final String username) throws NotFoundException {
         final User user = userRepository.findUserByUsername(username).orElseThrow(NotFoundException::new);
         return Map.of("username", user.getUsername(), "email", user.getEmail(), "role", user.getRole());
     }

@@ -1,5 +1,6 @@
 package com.example.flashcards.dto.flashcard;
 
+import com.example.flashcards.model.Flashcard;
 import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -13,10 +14,10 @@ public class FlashcardForQuizDto {
     Integer id;
     QuestionDto question;
 
-    public static FlashcardForQuizDto createFrom(final int flashcardId, final QuestionDto question){
+    public static FlashcardForQuizDto createFrom(final Flashcard flashcard){
         return FlashcardForQuizDto.builder()
-                .id(flashcardId)
-                .question(question)
+                .id(flashcard.getId())
+                .question(QuestionDto.createFrom(flashcard.getQuestion()))
                 .build();
     }
 }

@@ -13,7 +13,7 @@ public interface FlashcardRepository extends JpaRepository<Flashcard, Integer> {
 
     List<Flashcard> findAllByUser(final User user);
 
-    Optional<Flashcard> findByQuestionName(final String questionName);
+    Optional<Flashcard> findByQuestionValue(final String questionValue);
 
     List<Flashcard> findAllByQuestionLanguageLangCode(final String langCode);
 
@@ -27,25 +27,25 @@ public interface FlashcardRepository extends JpaRepository<Flashcard, Integer> {
 
     List<Flashcard> findAllByUserAndAnswerLanguageLangCode(final User user, final String answerLangCode);
 
-    @Query(value = "SELECT f FROM Flashcard f WHERE f.user=:user AND f.question.name LIKE %:query%")
+    @Query(value = "SELECT f FROM Flashcard f WHERE f.user=:user AND f.question.value LIKE %:query%")
     List<Flashcard> findAllByUserAndQuestionContaining(@Param("user") final User user,
                                                        @Param("query") final String query);
 
-    @Query(value = "SELECT f FROM Flashcard f WHERE f.user=:user AND f.question.name LIKE %:query% AND f.question" +
+    @Query(value = "SELECT f FROM Flashcard f WHERE f.user=:user AND f.question.value LIKE %:query% AND f.question" +
                    ".language.langCode=:questionLangCode AND f.answer.language.langCode=:answerLangCode")
     List<Flashcard> findAllByUserAndQuestionLangCodeAndAnswerLangCodeAndQuestionContaining(
             @Param("user") final User user, @Param("query") final String query,
             @Param("questionLangCode") final String questionLangCode,
             @Param("answerLangCode") final String answerLangCode);
 
-    @Query(value = "SELECT f FROM Flashcard f WHERE f.user=:user AND f.question.name LIKE %:query% AND f.question" +
+    @Query(value = "SELECT f FROM Flashcard f WHERE f.user=:user AND f.question.value LIKE %:query% AND f.question" +
                    ".language.langCode=:questionLangCode")
     List<Flashcard> findAllByUserAndQuestionLangCodeAndQuestionContaining(@Param("user") final User user,
                                                                           @Param("query") final String query,
                                                                           @Param("questionLangCode")
                                                                           final String questionLangCode);
 
-    @Query(value = "SELECT f FROM Flashcard f WHERE f.user=:user AND f.question.name LIKE %:query% AND f.answer.language.langCode=:answerLangCode")
+    @Query(value = "SELECT f FROM Flashcard f WHERE f.user=:user AND f.question.value LIKE %:query% AND f.answer.language.langCode=:answerLangCode")
     List<Flashcard> findAllByUserAndAnswerLangCodeAndQuestionContaining(@Param("user") final User user,
                                                                         @Param("query") final String query,
                                                                         @Param("answerLangCode")
