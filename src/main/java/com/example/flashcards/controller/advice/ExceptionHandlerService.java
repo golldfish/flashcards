@@ -38,7 +38,7 @@ public class ExceptionHandlerService {
         return buildErrorResponse(exception);
     }
 
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseStatus(BAD_REQUEST)
     @ExceptionHandler(InvalidArgumentException.class)
     public ErrorResponse invalidArgumentHandler(final InvalidArgumentException exception) {
         return buildErrorResponse(exception);

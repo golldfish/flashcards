@@ -1,9 +1,6 @@
 package com.example.flashcards.model;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
@@ -12,10 +9,11 @@ import java.io.Serializable;
 import java.util.List;
 
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
 @Entity
-@RequiredArgsConstructor
 @Table(name = "quiz")
 public class Quiz implements Serializable {
     @Id

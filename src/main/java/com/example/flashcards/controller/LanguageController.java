@@ -2,17 +2,12 @@ package com.example.flashcards.controller;
 
 import com.example.flashcards.dto.flashcard.LanguageDto;
 import com.example.flashcards.service.LanguageService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -28,31 +23,53 @@ public class LanguageController {
 
     @GetMapping("/languages")
     @ResponseStatus(OK)
-    List<LanguageDto> all() {
-        return service.getLanguages();
+    @Operation(summary = "Get all languages",
+            responses = {@ApiResponse(responseCode = "200", description = "Data collected"),
+                    @ApiResponse(responseCode = "404", description = "User not found")})
+    List<LanguageDto> all(final Authentication authentication) {
+
+        return service.getLanguages(authentication.getName());
     }
 
     @GetMapping("/languages/{langCode}")
     @ResponseStatus(OK)
-    LanguageDto getLanguageByLangCode(@PathVariable final String langCode) {
-        return service.getLanguageByLangCode(langCode);
+    @Operation(summary = "Get language by lang code",
+            responses = {@ApiResponse(responseCode = "200", description = "Data collected"),
+                    @ApiResponse(responseCode = "404", description = "Language/User not found")})
+    LanguageDto getLanguageByLangCode(@PathVariable final String langCode, final Authentication authentication) {
+
+        return service.getLanguageByLangCode(langCode, authentication.getName());
     }
 
     @PostMapping("/admin/languages")
     @ResponseStatus(CREATED)
-    void add(@RequestBody LanguageDto languageDto) {
-        service.createNewLanguage(languageDto);
+    @Operation(summary = "Create language",
+            responses = {@ApiResponse(responseCode = "201", description = "Created"),
+                    @ApiResponse(responseCode = "404", description = "User not found"),
+                    @ApiResponse(responseCode = "409", description = "Language already exists")})
+    void add(@RequestBody final LanguageDto languageDto, final Authentication authentication) {
+
+        service.createLanguage(languageDto, authentication.getName());
     }
 
     @PutMapping(value = "/admin/languages/{langCode}")
     @ResponseStatus(OK)
-    void update(@PathVariable final String langCode, @RequestBody LanguageDto languageDto) {
-        service.changeLanguageData(langCode, languageDto);
+    @Operation(summary = "Edit language data",
+            responses = {@ApiResponse(responseCode = "200", description = "Edited"),
+                    @ApiResponse(responseCode = "404", description = "Language/User not found")})
+    void editLanguage(@PathVariable final String langCode, @RequestBody final LanguageDto languageDto, final Authentication authentication) {
+
+        service.editLanguageData(langCode, languageDto, authentication.getName());
     }
 
     @DeleteMapping(value = "/admin/languages/{langCode}")
     @ResponseStatus(OK)
-    void delete(@PathVariable final String langCode) {
-        service.deleteLanguage(langCode);
+    @Operation(summary = "Delete language",
+            responses = {@ApiResponse(responseCode = "200", description = "Data collected"),
+                    @ApiResponse(responseCode = "400", description = "Lanuage cannot be deleted - it's used in flashcards"),
+                    @ApiResponse(responseCode = "404", description = "Language/User not found")})
+    void delete(@PathVariable final String langCode, final Authentication authentication) {
+
+        service.deleteLanguage(langCode, authentication.getName());
     }
 }

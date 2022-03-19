@@ -7,10 +7,11 @@ import java.io.Serializable;
 
 @Data
 @Builder
-@RequiredArgsConstructor
-@Entity
+@NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
+@Entity
 @Table(name = "quiz_flashcard")
 public class QuizFlashcard implements Serializable {
 

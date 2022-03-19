@@ -1,7 +1,9 @@
 package com.example.flashcards.service;
 
 import com.example.flashcards.configuration.JwtTokenUtil;
+import com.example.flashcards.dto.UserDetailsDto;
 import com.example.flashcards.dto.UserDto;
+import com.example.flashcards.dto.UserLoginDto;
 import com.example.flashcards.dto.UserPasswordDto;
 import com.example.flashcards.exception.ConflictException;
 import com.example.flashcards.exception.NotFoundException;
@@ -19,8 +21,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Map;
-
 @Service
 @AllArgsConstructor
 public class UserService {
@@ -37,20 +37,16 @@ public class UserService {
         userValidator.isRegisterUserValid(userDto);
         userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
         userRepository.findUserByUsernameOrEmail(userDto.getUsername(), userDto.getEmail()).ifPresentOrElse(user -> {
-            throw new ConflictException();
+            throw new ConflictException("User already exist");
         }, () -> {
-            final User user = com.example.flashcards.model.User.builder()
-                    .username(userDto.getUsername())
-                    .email(userDto.getEmail())
-                    .password(userDto.getPassword())
-                    .build();
+            final User user = User.builder().username(userDto.getUsername()).email(userDto.getEmail()).password(userDto.getPassword()).build();
             userRepository.save(user);
         });
     }
 
     @Transactional
     public void changePassword(final String username, final UserPasswordDto userPasswordDto) {
-        final User user = userRepository.findUserByUsername(username).orElseThrow(NotFoundException::new);
+        final User user = userRepository.findUserByUsername(username).orElseThrow(() -> new NotFoundException("User not found"));
         userValidator.comparePasswordToDb(userPasswordDto.getOldPassword(), user.getPassword());
         userValidator.compareOldAndNewPassword(userPasswordDto.getOldPassword(), userPasswordDto.getPassword());
         userValidator.validatePasswords(userPasswordDto.getPassword(), userPasswordDto.getRepeatPassword());
@@ -59,19 +55,16 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public Map<String, String> createAuthenticationToken(final JwtRequest authenticationRequest) throws Exception {
+    public UserLoginDto loginAndCreateToken(final JwtRequest authenticationRequest) throws Exception {
         authenticate(authenticationRequest.getUsername(), authenticationRequest.getPassword());
         final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getUsername());
-        final User user = userRepository.findUserByUsername(authenticationRequest.getUsername())
-                .orElseThrow(NotFoundException::new);
-        return Map.of("username", user.getUsername(), "email", user.getEmail(), "token",
-                jwtTokenUtil.generateToken(userDetails));
+        final User user = userRepository.findUserByUsername(authenticationRequest.getUsername()).orElseThrow(() -> new NotFoundException("User not found"));
+        return UserLoginDto.createFrom(user, jwtTokenUtil.generateToken(userDetails));
     }
 
     @Transactional(readOnly = true)
-    public Map<String, String> getUserByUsername(final String username) throws NotFoundException {
-        final User user = userRepository.findUserByUsername(username).orElseThrow(NotFoundException::new);
-        return Map.of("username", user.getUsername(), "email", user.getEmail(), "role", user.getRole());
+    public UserDetailsDto getUserByUsername(final String username) throws NotFoundException {
+        return UserDetailsDto.createFrom(userRepository.findUserByUsername(username).orElseThrow(() -> new NotFoundException("User not found")));
     }
 
     private void authenticate(final String username, final String password) throws Exception {
