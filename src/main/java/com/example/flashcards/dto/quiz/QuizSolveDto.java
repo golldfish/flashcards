@@ -5,18 +5,12 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 
-import java.util.Set;
-
 @Value
 @Data
 @Builder
 @RequiredArgsConstructor
-public class QuizCreateDto {
-
-    String name;
-    String questionLangCode;
-    String answerLangCode;
-    Set<Integer> flashcardsId;
+public class QuizSolveDto {
+    Integer flashcardId;
+    String userAnswer;
 
 }
-

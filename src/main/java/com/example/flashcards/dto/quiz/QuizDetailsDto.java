@@ -1,7 +1,7 @@
 package com.example.flashcards.dto.quiz;
 
+import com.example.flashcards.model.Flashcard;
 import com.example.flashcards.model.Quiz;
-import com.example.flashcards.model.QuizFlashcard;
 import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -14,15 +14,14 @@ import java.util.stream.Collectors;
 @Data
 @Builder
 @RequiredArgsConstructor
-public class QuizResultDto {
+public class QuizDetailsDto {
     QuizDto quizData;
-    Set<QuizFlashcardResultDto> flashcards;
+    Set<QuizFlashcardDto> flashcards;
 
-    public static QuizResultDto createFrom(final Quiz quiz, final Set<QuizFlashcard> flashcards) {
-        return QuizResultDto.builder()
+    public static QuizDetailsDto createFrom(final Quiz quiz, final Set<Flashcard> flashcards) {
+        return QuizDetailsDto.builder()
                 .quizData(QuizDto.createFrom(quiz))
-                .flashcards(flashcards.stream().map(QuizFlashcardResultDto::createFrom).collect(Collectors.toSet()))
+                .flashcards(flashcards.stream().map(QuizFlashcardDto::createFrom).collect(Collectors.toSet()))
                 .build();
     }
-
 }

@@ -17,12 +17,11 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
 import java.util.Map;
 
 @Service
-@Transactional
 @AllArgsConstructor
 public class UserService {
 
@@ -33,6 +32,7 @@ public class UserService {
     private AuthenticationManager authenticationManager;
     private JwtTokenUtil jwtTokenUtil;
 
+    @Transactional
     public void createNewUser(final UserDto userDto) {
         userValidator.isRegisterUserValid(userDto);
         userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
@@ -48,6 +48,7 @@ public class UserService {
         });
     }
 
+    @Transactional
     public void changePassword(final String username, final UserPasswordDto userPasswordDto) {
         final User user = userRepository.findUserByUsername(username).orElseThrow(NotFoundException::new);
         userValidator.comparePasswordToDb(userPasswordDto.getOldPassword(), user.getPassword());
@@ -67,6 +68,7 @@ public class UserService {
                 jwtTokenUtil.generateToken(userDetails));
     }
 
+    @Transactional(readOnly = true)
     public Map<String, String> getUserByUsername(final String username) throws NotFoundException {
         final User user = userRepository.findUserByUsername(username).orElseThrow(NotFoundException::new);
         return Map.of("username", user.getUsername(), "email", user.getEmail(), "role", user.getRole());

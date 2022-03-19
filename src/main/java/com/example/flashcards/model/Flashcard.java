@@ -38,5 +38,5 @@ public class Flashcard implements Serializable {
     private User user;
 
     @OneToMany(mappedBy = "flashcard", fetch = FetchType.LAZY, orphanRemoval = true)
-    private List<QuizFlashcards> quizFlashcards;
+    private List<QuizFlashcard> quizFlashcards;
 }

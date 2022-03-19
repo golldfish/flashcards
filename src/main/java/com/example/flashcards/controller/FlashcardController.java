@@ -1,7 +1,6 @@
 package com.example.flashcards.controller;
 
 import com.example.flashcards.dto.flashcard.FlashcardDto;
-import com.example.flashcards.dto.flashcard.FlashcardForQuizDto;
 import com.example.flashcards.service.FlashcardService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.MediaType;
@@ -63,7 +62,7 @@ public class FlashcardController {
     @RequestMapping(params = {"questionLangCode", "answerLangCode"})
     @GetMapping()
     @ResponseStatus(OK)
-    List<FlashcardForQuizDto> getFlashcardsByLangCodes(@RequestParam("questionLangCode") final String questionLangCode,
+    List<FlashcardDto> getFlashcardsByLangCodes(@RequestParam("questionLangCode") final String questionLangCode,
                                                        @RequestParam("answerLangCode") final String answerLangCode,
                                                        final Authentication authentication) {
         return flashcardsService.getFlashcardsByLangCodes(questionLangCode, answerLangCode, authentication.getName());

@@ -1,18 +1,15 @@
 package com.example.flashcards.controller;
 
-import com.flashcards.dto.quiz.*;
-import com.flashcards.exception.AlreadyExistsException;
-import com.flashcards.service.QuizService;
-import lombok.AllArgsConstructor;
+import com.example.flashcards.dto.quiz.*;
+import com.example.flashcards.service.QuizService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
+import java.util.List;
 
+import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
 
 @RestController
@@ -23,48 +20,51 @@ public class QuizController {
 
     @GetMapping()
     @ResponseStatus(OK)
-    ResponseEntity<Map<String, Object>> getAll(final Authentication authentication) {
-        return new ResponseEntity<>(quizService.getQuizzes(  authentication.getName()), OK);
+    List<QuizDto> getAll(final Authentication authentication) {
+        return quizService.getAll(authentication.getName());
     }
 
-    @PostMapping("/quizzes")
-    ResponseEntity<Void> newQuiz(@RequestBody QuizCreateDto quizCreateDto, final Authentication authentication) throws AlreadyExistsException {
-        quizService.createNewQuiz(quizCreateDto, authentication.getName());
-        return new ResponseEntity<>(HttpStatus.CREATED);
+    @PostMapping
+    @ResponseStatus(CREATED)
+    void newQuiz(@RequestBody QuizCreateDto quizCreateDto, final Authentication authentication) {
+        quizService.createQuiz(quizCreateDto, authentication.getName());
     }
 
-    @PutMapping(value = "/quizzes/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<Void> updateQuiz(@PathVariable final int id, @RequestBody QuizEditDto quizEditDto) {
-        quizService.editQuiz(id, quizEditDto);
-        return new ResponseEntity<>(OK);
+    @PutMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(OK)
+    void editQuiz(@PathVariable final int id, @RequestBody final QuizEditDto quizEditDto, final Authentication authentication) {
+        quizService.editQuiz(id, quizEditDto, authentication.getName());
     }
 
-    @GetMapping("/quizzes/{id}/edit")
-    ResponseEntity<QuizEditDisplayDto> getQuizByIdToDisplayEdit(@PathVariable final int id) {
-        return new ResponseEntity<>(quizService.getQuizByIdToDisplayEdit(id), OK);
+    //edit + solve w jedno
+
+    @GetMapping("/{id}/edit")
+    @ResponseStatus(OK)
+    QuizDetailsDto getQuizDetailsToDisplayEdit(@PathVariable final int id, final Authentication authentication) {
+        return quizService.getQuizDetails(id, authentication.getName());
     }
 
-    @GetMapping("/quizzes/{id}/take")
-    ResponseEntity<QuizTakeToSolveDto> getQuizByIdToSolve(@PathVariable final int id) {
-        return new ResponseEntity<>(quizService.getQuizByIdToSolve(id), OK);
+    @GetMapping("/{id}/solve")
+    @ResponseStatus(OK)
+    QuizDetailsDto getQuizDetailsToSolveQuiz(@PathVariable final int id, final Authentication authentication) {
+        return quizService.getQuizDetails(id, authentication.getName());
     }
 
-    @PostMapping("/quizzes/{id}/take")
-    ResponseEntity<Void> solveQuiz(@PathVariable final int id, @RequestBody QuizSolveDto quizSolveDto) throws AlreadyExistsException {
-        quizService.solveQuiz(id, quizSolveDto);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+    @PostMapping("/{id}/solve")
+    @ResponseStatus(CREATED)
+    void solveQuiz(@PathVariable final int id, @RequestBody final List<QuizSolveDto> quizSolveDtos, final Authentication authentication) {
+        quizService.solveQuiz(id, quizSolveDtos, authentication.getName());
     }
 
-
-    @GetMapping("/quizzes/{id}/results")
-    ResponseEntity<QuizResultDto> getResults(@PathVariable final int id) {
-        return new ResponseEntity<>(quizService.getResults(id), OK);
+    @GetMapping("/{id}/results")
+    @ResponseStatus(OK)
+    QuizResultDto getResults(@PathVariable final int id, final Authentication authentication) {
+        return quizService.getResults(id, authentication.getName());
     }
 
-    @DeleteMapping("/quizzes/{id}")
-    ResponseEntity<Void> deleteQuizById(@PathVariable final int id) {
-        quizService.deleteQuizById(id);
-        return new ResponseEntity<>(OK);
+    @DeleteMapping("/{id}")
+    @ResponseStatus(OK)
+    void deleteQuizById(@PathVariable final int id, final Authentication authentication) {
+        quizService.deleteQuizById(id, authentication.getName());
     }
-
 }

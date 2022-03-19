@@ -1,179 +1,164 @@
 package com.example.flashcards.service;
 
-import com.example.flashcards.dto.quiz.QuizDto;
+import com.example.flashcards.dto.quiz.*;
 import com.example.flashcards.exception.NotFoundException;
-import com.example.flashcards.model.Answer;
-import com.example.flashcards.model.Question;
+import com.example.flashcards.model.Flashcard;
 import com.example.flashcards.model.Quiz;
+import com.example.flashcards.model.QuizFlashcard;
 import com.example.flashcards.model.User;
 import com.example.flashcards.repository.FlashcardRepository;
 import com.example.flashcards.repository.QuizFlashcardsRepository;
 import com.example.flashcards.repository.QuizRepository;
 import com.example.flashcards.repository.UserRepository;
-import com.flashcards.dao.FlashcardRepository;
-import com.flashcards.dao.QuizFlashcardsRepository;
-import com.flashcards.dao.QuizRepository;
-import com.flashcards.dao.UserRepository;
-import com.flashcards.dto.quiz.*;
-import com.flashcards.exception.InvalidDataException;
-import com.flashcards.exception.NotFoundException;
-import com.flashcards.model.*;
-import com.flashcards.service.map.FlashcardMapper;
-import com.flashcards.service.map.QuizFlashcardMapper;
-import com.flashcards.service.map.QuizMapper;
+import com.example.flashcards.validation.QuizValidator;
 import com.google.common.collect.Sets;
 import lombok.AllArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
-@Transactional
 @AllArgsConstructor
 public class QuizService {
+
     private final FlashcardRepository flashcardRepository;
     private final UserRepository userRepository;
     private final QuizRepository quizRepository;
     private final QuizFlashcardsRepository quizFlashcardsRepository;
     private final FlashcardService flashcardService;
+    private final QuizValidator quizValidator;
 
-    public List<QuizDto> getQuizzes(final String username) {
+    @Transactional(readOnly = true)
+    public List<QuizDto> getAll(final String username) {
         final User user = userRepository.findUserByUsername(username).orElseThrow(NotFoundException::new);
         final List<Quiz> quizzes = quizRepository.findAllByUser(user);
         return quizzes.stream().map(QuizDto::createFrom).collect(Collectors.toList());
     }
 
-    public void createNewQuiz(final QuizCreateDto quizCreateDto, final String username) {
-        if (StringUtils.isBlank(quizCreateDto.getName()) || StringUtils.isBlank(quizCreateDto.getAnswerLangCode()) || StringUtils.isBlank(quizCreateDto.getQuestionLangCode()) || quizCreateDto.getFlashcardsIds().isEmpty()) {
-            throw new InvalidDataException();
-        }
+    @Transactional
+    public void createQuiz(final QuizCreateDto quizCreateDto, final String username) {
+        quizValidator.validateQuizCreateParameters(quizCreateDto);
+
         final User user = userRepository.findUserByUsername(username).orElseThrow(NotFoundException::new);
-        final List<Flashcard> flashcards = new ArrayList<>();
-        for (Integer flashcardsId : quizCreateDto.getFlashcardsIds()) {
-            final Flashcard flashcard = flashcardRepository.findById(flashcardsId).orElseThrow(NotFoundException::new);
-            flashcards.add(flashcard);
-            flashcardMapper.setFlagForFlashcardEntity(flashcard, true);
-            flashcardRepository.save(flashcard);
-        }
 
-        final Quiz quiz = quizMapper.convertQuizCreateDtoToEntity(quizCreateDto, user);
-        final List<QuizFlashcards> quizFlashcards = new ArrayList<>();
-        flashcards.forEach(flashcard -> quizFlashcards.add(quizFlashcardMapper.convertToQuizFlashcardEntity(flashcard, quiz)));
+        final Set<Flashcard> flashcards = quizCreateDto.getFlashcardsId().stream()
+                .map(f -> flashcardRepository.findById(f).orElseThrow(NotFoundException::new))
+                .peek(flashcard -> {
+                    flashcard.setUsed(true);
+                    flashcardRepository.save(flashcard);
+                })
+                .collect(Collectors.toSet());
 
+        final Quiz quiz = Quiz.builder()
+                .name(quizCreateDto.getName())
+                .user(user)
+                .quizFlashcards(new ArrayList<>())
+                .build();
 
+        final List<QuizFlashcard> quizFlashcards = new ArrayList<>();
+        flashcards.forEach(flashcard -> quizFlashcards.add(buildQuizFlashcard(quiz, flashcard)));
         quizFlashcardsRepository.saveAll(quizFlashcards);
-        quizMapper.addQuizFlashcardsToQuiz(quiz, quizFlashcards);
+        quiz.setQuizFlashcards(quizFlashcards);
         quizRepository.save(quiz);
     }
 
-    public void editQuiz(final int id, final QuizEditDto quizEditDto) {
-        if (StringUtils.isBlank(quizEditDto.getName()) || quizEditDto.getFlashcardsIds().isEmpty()) {
-            throw new InvalidDataException();
-        }
+    @Transactional
+    public void editQuiz(final int id, final QuizEditDto quizEditDto, final String username) {
+        quizValidator.validateQuizEditParameters(quizEditDto);
+        userRepository.findUserByUsername(username).orElseThrow(NotFoundException::new);
+
         final Quiz quiz = quizRepository.findById(id).orElseThrow(NotFoundException::new);
-        final Set<Integer> currentFlashcardsIds = returnCurrentFlashcardsIds(quizFlashcardsRepository.findByQuizId(id));
-        Sets.SetView<Integer> flashcardsIdsToRemove = Sets.difference(currentFlashcardsIds, quizEditDto.getFlashcardsIds());
-        Sets.SetView<Integer> flashcardsIdsToAdd = Sets.difference(quizEditDto.getFlashcardsIds(), currentFlashcardsIds);
-        final List<Flashcard> flashcards = new ArrayList<>();
-        for (Integer integer : flashcardsIdsToAdd) {
-            final Flashcard flashcard = flashcardRepository.findById(integer).orElseThrow(NotFoundException::new);
-            flashcards.add(flashcard);
-            flashcardMapper.setFlagForFlashcardEntity(flashcard, true);
+
+        final Set<Integer> currentFlashcardsIds = quizFlashcardsRepository.findFlashcardsIdByQuizId(id);
+        final Sets.SetView<Integer> flashcardsIdsToRemove = Sets.difference(currentFlashcardsIds, quizEditDto.getFlashcardsId());
+        final Sets.SetView<Integer> flashcardsIdsToAdd = Sets.difference(quizEditDto.getFlashcardsId(), currentFlashcardsIds);
+
+        flashcardsIdsToRemove.forEach(f -> quizFlashcardsRepository.findByQuizIdAndFlashcardId(id, f).ifPresentOrElse(qf -> {
+            if (quizFlashcardsRepository.findByFlashcardId(qf.getFlashcard().getId()).isEmpty()
+                    || quizFlashcardsRepository.findByFlashcardId(qf.getFlashcard().getId()).contains(qf)) {
+                qf.getFlashcard().setUsed(false);
+                flashcardRepository.save(qf.getFlashcard());
+            }
+            quizFlashcardsRepository.deleteById(qf.getId());
+        }, NotFoundException::new));
+
+        final List<QuizFlashcard> quizFlashcards = new ArrayList<>();
+        flashcardsIdsToAdd.forEach(f -> flashcardRepository.findById(f).ifPresentOrElse(flashcard -> {
+            flashcard.setUsed(true);
             flashcardRepository.save(flashcard);
-        }
+            quizFlashcards.add(buildQuizFlashcard(quiz, flashcard));
+        }, NotFoundException::new));
 
-        flashcardsIdsToRemove.forEach(flashcard -> {
-            final QuizFlashcards quizFlashcard = quizFlashcardsRepository.findByQuizIdAndFlashcardId(quiz.getId(), flashcard).orElseThrow(NotFoundException::new);
-            flashcardMapper.setFlagForFlashcardEntity(quizFlashcard.getFlashcard(), false);
-            flashcardRepository.save(quizFlashcard.getFlashcard());
-            quizFlashcardsRepository.deleteById(quizFlashcard.getId());
-        });
-
-        final List<QuizFlashcards> quizFlashcards = new ArrayList<>();
-        flashcards.forEach(flashcard -> quizFlashcards.add(quizFlashcardMapper.convertToQuizFlashcardEntity(flashcard, quiz)));
         quizFlashcardsRepository.saveAll(quizFlashcards);
-        quizMapper.updateQuizFromDto(quizEditDto, quiz);
+        quiz.setName(quizEditDto.getName());
         if (!flashcardsIdsToAdd.isEmpty() || !flashcardsIdsToRemove.isEmpty()) {
-            quizMapper.updateQuizScore(quiz, null);
+            quiz.setScore(null);
         }
         quizRepository.save(quiz);
     }
 
-    public QuizEditDisplayDto getQuizByIdToDisplayEdit(final int id) {
+    @Transactional(readOnly = true)
+    public QuizDetailsDto getQuizDetails(final int id, final String username) {
+        userRepository.findUserByUsername(username).orElseThrow(NotFoundException::new);
         final Quiz quiz = quizRepository.findById(id).orElseThrow(NotFoundException::new);
-        final List<QuizFlashcards> flashcards = quizFlashcardsRepository.findByQuizId(id);
-        return quizMapper.convertToQuizEditDisplayDto(quiz, flashcards);
+        return QuizDetailsDto.createFrom(quiz, flashcardRepository.findAllByQuizId(id));
     }
 
-    public QuizTakeToSolveDto getQuizByIdToSolve(final int id) {
-        final Quiz quiz = quizRepository.findById(id).orElseThrow(NotFoundException::new);
-        final List<QuizFlashcards> flashcards = quizFlashcardsRepository.findByQuizId(id, Sort.by("flashcard.id"));
-        return quizMapper.convertToQuizTakeToSolveDto(quiz, flashcards);
-    }
+    @Transactional
+    public void solveQuiz(final Integer id, final List<QuizSolveDto> quizSolveDtos, final String username) {
+        quizSolveDtos.forEach(quizValidator::validateQuizSolveParameters);
+        userRepository.findUserByUsername(username).orElseThrow(NotFoundException::new);
 
-    public void solveQuiz(final Integer id, final QuizSolveDto quizSolveDto) {
         final Quiz quiz = quizRepository.findById(id).orElseThrow(NotFoundException::new);
 
-        final List<QuizSolvedDto> quizSolvedDtos = quizSolveDto.getResults();
-
-        quizSolvedDtos.forEach(quizSolvedDto -> {
-            QuizFlashcards quizFlashcard = quizFlashcardsRepository.findByQuizIdAndFlashcardId(id, quizSolvedDto.getFlashcardId()).orElseThrow(NotFoundException::new);
-            quizFlashcardMapper.updateQuizFlashcardEntity(quizSolvedDto, quizFlashcard);
+        quizSolveDtos.forEach(qs -> {
+            final QuizFlashcard quizFlashcard = quizFlashcardsRepository.findByQuizIdAndFlashcardId(id, qs.getFlashcardId()).orElseThrow(NotFoundException::new);
+            quizFlashcard.setUserAnswer(qs.getUserAnswer());
             quizFlashcardsRepository.save(quizFlashcard);
         });
-        quizMapper.updateQuizScore(quiz, calculateResult(quiz));
+
+        quiz.setScore(calculateResult(quiz));
         quizRepository.save(quiz);
     }
 
-    public QuizResultDto getResults(final int id) {
+    @Transactional(readOnly = true)
+    public QuizResultDto getResults(final int id, final String username) {
+        userRepository.findUserByUsername(username).orElseThrow(NotFoundException::new);
         final Quiz quiz = quizRepository.findById(id).orElseThrow(NotFoundException::new);
-        final List<QuizFlashcards> flashcards = quizFlashcardsRepository.findByQuizId(id, Sort.by("flashcard.id"));
-        return quizMapper.convertToQuizResultDto(quiz, flashcards);
+        return QuizResultDto.createFrom(quiz, quizFlashcardsRepository.findByQuizId(id));
     }
 
-    public void deleteQuizById(final int id) {
-        quizRepository.findById(id).ifPresentOrElse(flashcard -> {
-            final List<QuizFlashcards> quizFlashcards = quizRepository.findById(id).get().getQuizFlashcards();
-            quizFlashcards.forEach(quizFlashcard -> {
-                flashcardMapper.setFlagForFlashcardEntity(quizFlashcard.getFlashcard(), false);
-                flashcardRepository.save(quizFlashcard.getFlashcard());
-            });
-            quizRepository.deleteById(id);
-        }, () -> {
-            throw new NotFoundException();
-        });
+    public void deleteQuizById(final int id, final String username) {
+        userRepository.findUserByUsername(username).orElseThrow(NotFoundException::new);
 
-    }
-
-    private Set<Integer> returnCurrentFlashcardsIds(final List<QuizFlashcards> flashcards) {
-        final Set<Integer> ids = new HashSet<>();
-        flashcards.forEach(flashcard -> ids.add(flashcard.getFlashcard().getId()));
-        return ids;
-    }
-
-    private Integer calculateResult(final Quiz quiz) {
-        AtomicInteger correctAnswers = new AtomicInteger();
-        List<QuizFlashcards> flashcards = quizFlashcardsRepository.findByQuizId(quiz.getId());
-        flashcards.forEach(flashcard -> {
-            if (compareAnswers(flashcard.getFlashcard().getAnswer().getName(), flashcard.getUserAnswer())) {
-                correctAnswers.addAndGet(1);
+        quizRepository.findById(id).ifPresentOrElse(quiz -> quiz.getQuizFlashcards().forEach(qf -> {
+            if (quizFlashcardsRepository.findByFlashcardId(qf.getFlashcard().getId()).isEmpty()
+                    || quizFlashcardsRepository.findByFlashcardId(qf.getFlashcard().getId()).contains(qf)) {
+                qf.getFlashcard().setUsed(false);
+                flashcardRepository.save(qf.getFlashcard());
             }
-        });
-        return (correctAnswers.get() * 100) / quiz.getQuizFlashcards().size();
+            quizRepository.deleteById(id);
+        }), NotFoundException::new);
     }
 
-    private boolean compareAnswers(final String correctAnswer, final String userAnswer) {
-        return correctAnswer.equalsIgnoreCase(userAnswer);
+    private QuizFlashcard buildQuizFlashcard(final Quiz quiz, final Flashcard flashcard) {
+        return QuizFlashcard.builder()
+                .quiz(quiz)
+                .flashcard(flashcard)
+                .userAnswer(null)
+                .build();
     }
 
+    private int calculateResult(final Quiz quiz) {
+        final long correct = quizFlashcardsRepository.findByQuizId(quiz.getId()).stream()
+                .filter(qf -> qf.getFlashcard().getAnswer().getValue().equalsIgnoreCase(qf.getUserAnswer())).count();
 
+        return ((int) correct * 100) / quiz.getQuizFlashcards().size();
+    }
 }
 
 

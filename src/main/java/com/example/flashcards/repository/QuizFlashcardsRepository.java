@@ -1,17 +1,25 @@
 package com.example.flashcards.repository;
 
-import com.example.flashcards.model.QuizFlashcards;
+import com.example.flashcards.model.QuizFlashcard;
+import com.example.flashcards.model.QuizFlashcardsKey;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
-public interface QuizFlashcardsRepository extends JpaRepository<QuizFlashcards, Integer> {
+public interface QuizFlashcardsRepository extends JpaRepository<QuizFlashcard, Integer> {
 
-    List<QuizFlashcards> findByQuizId(final Integer id);
+    Set<QuizFlashcard> findByQuizId(final Integer id);
 
-    List<QuizFlashcards> findByQuizId(final Integer id, final Sort sort);
+    @Query(value = "SELECT f.id FROM QuizFlashcard qf JOIN Flashcard f ON qf.flashcard = f WHERE qf.quiz.id = :id")
+    Set<Integer> findFlashcardsIdByQuizId(final Integer id);
 
-    Optional<QuizFlashcards> findByQuizIdAndFlashcardId(final Integer quizId, final Integer flashcardId);
+    Optional<QuizFlashcard> findByQuizIdAndFlashcardId(final Integer quizId, final Integer flashcardId);
+
+    Set<QuizFlashcard> findByFlashcardId(final int id);
+
+    void deleteById(final QuizFlashcardsKey key);
 }

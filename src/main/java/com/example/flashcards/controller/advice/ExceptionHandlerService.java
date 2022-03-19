@@ -3,7 +3,9 @@ package com.example.flashcards.controller.advice;
 import com.example.flashcards.dto.ErrorResponse;
 import com.example.flashcards.exception.BadRequestException;
 import com.example.flashcards.exception.ConflictException;
+import com.example.flashcards.exception.InvalidArgumentException;
 import com.example.flashcards.exception.NotFoundException;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -36,4 +38,9 @@ public class ExceptionHandlerService {
         return buildErrorResponse(exception);
     }
 
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(InvalidArgumentException.class)
+    public ErrorResponse invalidArgumentHandler(final InvalidArgumentException exception) {
+        return buildErrorResponse(exception);
+    }
 }

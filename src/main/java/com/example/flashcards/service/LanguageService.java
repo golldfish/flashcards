@@ -29,11 +29,13 @@ public class LanguageService {
         return languages.stream().map(LanguageDto::createFrom).collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public LanguageDto getLanguageByLangCode(final String langCode) {
         final Language lang = languageRepository.findByLangCode(langCode).orElseThrow(NotFoundException::new);
         return LanguageDto.createFrom(lang);
     }
 
+    @Transactional
     public void createNewLanguage(final LanguageDto languageDto) {
         if (StringUtils.isBlank(languageDto.getLangCode()) || StringUtils.isBlank(languageDto.getName())) {
             throw new ConflictException();
@@ -49,6 +51,7 @@ public class LanguageService {
                 });
     }
 
+    @Transactional
     public void changeLanguageData(final String langCode, final LanguageDto languageDto) {
         final Language lang = languageRepository.findByLangCode(langCode).orElseThrow(NotFoundException::new);
         if (StringUtils.isBlank(languageDto.getName())) {
@@ -58,6 +61,7 @@ public class LanguageService {
         languageRepository.save(lang);
     }
 
+    @Transactional
     public void deleteLanguage(final String langCode) {
         final List<Flashcard> questionsWithLangCode = flashcardRepository.findAllByQuestionLanguageLangCode(langCode);
         final List<Flashcard> answersWithLangCode = flashcardRepository.findAllByAnswerLanguageLangCode(langCode);

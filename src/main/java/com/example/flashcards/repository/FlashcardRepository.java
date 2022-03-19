@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface FlashcardRepository extends JpaRepository<Flashcard, Integer> {
 
@@ -27,12 +28,15 @@ public interface FlashcardRepository extends JpaRepository<Flashcard, Integer> {
 
     List<Flashcard> findAllByUserAndAnswerLanguageLangCode(final User user, final String answerLangCode);
 
+    @Query(value = "select f from Flashcard  f JOIN QuizFlashcard qf ON f.id = qf.flashcard.id where qf.quiz.id=:id")
+    Set<Flashcard> findAllByQuizId(final Integer id);
+
     @Query(value = "SELECT f FROM Flashcard f WHERE f.user=:user AND f.question.value LIKE %:query%")
     List<Flashcard> findAllByUserAndQuestionContaining(@Param("user") final User user,
                                                        @Param("query") final String query);
 
     @Query(value = "SELECT f FROM Flashcard f WHERE f.user=:user AND f.question.value LIKE %:query% AND f.question" +
-                   ".language.langCode=:questionLangCode AND f.answer.language.langCode=:answerLangCode")
+            ".language.langCode=:questionLangCode AND f.answer.language.langCode=:answerLangCode")
     List<Flashcard> findAllByUserAndQuestionLangCodeAndAnswerLangCodeAndQuestionContaining(
             @Param("user") final User user, @Param("query") final String query,
             @Param("questionLangCode") final String questionLangCode,

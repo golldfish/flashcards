@@ -1,7 +1,6 @@
 package com.example.flashcards.service;
 
 import com.example.flashcards.dto.flashcard.FlashcardDto;
-import com.example.flashcards.dto.flashcard.FlashcardForQuizDto;
 import com.example.flashcards.exception.BadRequestException;
 import com.example.flashcards.exception.ConflictException;
 import com.example.flashcards.exception.NotFoundException;
@@ -14,19 +13,15 @@ import com.example.flashcards.repository.LanguageRepository;
 import com.example.flashcards.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
 import java.sql.Timestamp;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
-@Transactional
 @AllArgsConstructor
 public class FlashcardService {
 
@@ -34,17 +29,20 @@ public class FlashcardService {
     private final UserRepository userRepository;
     private final LanguageRepository languageRepository;
 
+    @Transactional(readOnly = true)
     public List<FlashcardDto> getFlashcards(final String username) {
         final User user = userRepository.findUserByUsername(username).orElseThrow(NotFoundException::new);
         final List<Flashcard> flashcards = flashcardRepository.findAllByUser(user);
         return flashcards.stream().map(FlashcardDto::createFrom).collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public FlashcardDto getFlashcardById(final int id) {
         final Flashcard flashcard = flashcardRepository.findById(id).orElseThrow(NotFoundException::new);
         return FlashcardDto.createFrom(flashcard);
     }
 
+    @Transactional
     public void createFlashcard(final FlashcardDto flashcardDto, final String username) {
         if (StringUtils.isBlank(flashcardDto.getQuestion().getValue()) ||
             StringUtils.isBlank(flashcardDto.getQuestion().getLangCode()) ||
@@ -77,6 +75,7 @@ public class FlashcardService {
 
     }
 
+    @Transactional
     public void changeFlashcardData(final int id, final FlashcardDto flashcardDto) {
         final Flashcard flashcard = flashcardRepository.findById(id).orElseThrow(NotFoundException::new);
         if (StringUtils.isBlank(flashcardDto.getQuestion().getValue()) ||
@@ -95,29 +94,28 @@ public class FlashcardService {
         flashcardRepository.save(flashcard);
     }
 
+    @Transactional
     public void deleteFlashcardById(final int id) {
         flashcardRepository.findById(id).ifPresentOrElse(flashcard -> {
-            if (! flashcard.isUsed()) {
+            if (!flashcard.isUsed()) {
                 flashcardRepository.deleteById(id);
-
             } else {
-                //Flashcard is used in quiz, cannot be deleted.
                 throw new BadRequestException();
             }
-        }, () -> {
-            throw new NotFoundException();
-        });
+        }, NotFoundException::new);
     }
 
-    public List<FlashcardForQuizDto> getFlashcardsByLangCodes(final String questionLangCode,
+    @Transactional(readOnly = true)
+    public List<FlashcardDto> getFlashcardsByLangCodes(final String questionLangCode,
                                                               final String answerLangCode, final String username) {
         final User user = userRepository.findUserByUsername(username).orElseThrow(NotFoundException::new);
         final List<Flashcard> flashcards =
                 flashcardRepository.findAllByUserAndQuestionLanguageLangCodeAndAnswerLanguageLangCode(user,
                         questionLangCode, answerLangCode);
-        return flashcards.stream().map(FlashcardForQuizDto::createFrom).collect(Collectors.toList());
+        return flashcards.stream().map(FlashcardDto::createFrom).collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<FlashcardDto> getFlashcardsByQuestionLangCode(final String questionLangCode, final String username) {
         final User user = userRepository.findUserByUsername(username).orElseThrow(NotFoundException::new);
         final List<Flashcard> flashcards =
@@ -125,6 +123,7 @@ public class FlashcardService {
         return flashcards.stream().map(FlashcardDto::createFrom).collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<FlashcardDto> getFlashcardsByAnswerLangCode(final String answerLangCode, final String username) {
         final User user = userRepository.findUserByUsername(username).orElseThrow(NotFoundException::new);
         final List<Flashcard> flashcards =
@@ -132,12 +131,14 @@ public class FlashcardService {
         return flashcards.stream().map(FlashcardDto::createFrom).collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<FlashcardDto> getFlashcardsByQuestionQuery(final String questionQuery, final String username) {
         final User user = userRepository.findUserByUsername(username).orElseThrow(NotFoundException::new);
         final List<Flashcard> flashcards = flashcardRepository.findAllByUserAndQuestionContaining(user, questionQuery);
         return flashcards.stream().map(FlashcardDto::createFrom).collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<FlashcardDto> getFlashcardsByQuestionLangCodeAndAnswerLangCodeAndQuestionQuery(
             final String questionLangCode, final String answerLangCode, final String questionQuery,
             final String username) {
@@ -148,6 +149,7 @@ public class FlashcardService {
         return flashcards.stream().map(FlashcardDto::createFrom).collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<FlashcardDto> getFlashcardsByQuestionLangCodeAndQuestionQuery(final String questionLangCode,
                                                                               final String questionQuery,
                                                                               final String username) {
@@ -158,6 +160,7 @@ public class FlashcardService {
         return flashcards.stream().map(FlashcardDto::createFrom).collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<FlashcardDto> getFlashcardsByAnswerLangCodeAndQuestionQuery(final String answerLangCode,
                                                                             final String questionQuery,
                                                                             final String username) {

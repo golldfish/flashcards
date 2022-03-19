@@ -1,17 +1,16 @@
 package com.example.flashcards.dto.quiz;
-
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import lombok.Value;
 
 import java.util.Set;
 
+@Value
 @Data
 @Builder
-@AllArgsConstructor
-@NoArgsConstructor
+@RequiredArgsConstructor
 public class QuizEditDto {
-    private String name;
-    private Set<Integer> flashcardsIds;
+    String name;
+    Set<Integer> flashcardsId;
 }
