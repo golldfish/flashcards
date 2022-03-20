@@ -4,6 +4,7 @@ import com.example.flashcards.dto.flashcard.LanguageDto;
 import com.example.flashcards.service.LanguageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
@@ -23,7 +24,7 @@ public class LanguageController {
 
     @GetMapping("/languages")
     @ResponseStatus(OK)
-    @Operation(summary = "Get all languages",
+    @Operation(security = @SecurityRequirement(name = "token"), summary = "Get all languages",
             responses = {@ApiResponse(responseCode = "200", description = "Data collected"),
                     @ApiResponse(responseCode = "404", description = "User not found")})
     List<LanguageDto> all(final Authentication authentication) {
@@ -33,7 +34,7 @@ public class LanguageController {
 
     @GetMapping("/languages/{langCode}")
     @ResponseStatus(OK)
-    @Operation(summary = "Get language by lang code",
+    @Operation(security = @SecurityRequirement(name = "token"), summary = "Get language by lang code",
             responses = {@ApiResponse(responseCode = "200", description = "Data collected"),
                     @ApiResponse(responseCode = "404", description = "Language/User not found")})
     LanguageDto getLanguageByLangCode(@PathVariable final String langCode, final Authentication authentication) {
@@ -43,7 +44,7 @@ public class LanguageController {
 
     @PostMapping("/admin/languages")
     @ResponseStatus(CREATED)
-    @Operation(summary = "Create language",
+    @Operation(security = @SecurityRequirement(name = "token"), summary = "Create language",
             responses = {@ApiResponse(responseCode = "201", description = "Created"),
                     @ApiResponse(responseCode = "404", description = "User not found"),
                     @ApiResponse(responseCode = "409", description = "Language already exists")})
@@ -54,7 +55,7 @@ public class LanguageController {
 
     @PutMapping(value = "/admin/languages/{langCode}")
     @ResponseStatus(OK)
-    @Operation(summary = "Edit language data",
+    @Operation(security = @SecurityRequirement(name = "token"), summary = "Edit language data",
             responses = {@ApiResponse(responseCode = "200", description = "Edited"),
                     @ApiResponse(responseCode = "404", description = "Language/User not found")})
     void editLanguage(@PathVariable final String langCode, @RequestBody final LanguageDto languageDto, final Authentication authentication) {
@@ -64,9 +65,9 @@ public class LanguageController {
 
     @DeleteMapping(value = "/admin/languages/{langCode}")
     @ResponseStatus(OK)
-    @Operation(summary = "Delete language",
+    @Operation(security = @SecurityRequirement(name = "token"), summary = "Delete language",
             responses = {@ApiResponse(responseCode = "200", description = "Data collected"),
-                    @ApiResponse(responseCode = "400", description = "Lanuage cannot be deleted - it's used in flashcards"),
+                    @ApiResponse(responseCode = "400", description = "Language cannot be deleted - it's used in flashcards"),
                     @ApiResponse(responseCode = "404", description = "Language/User not found")})
     void delete(@PathVariable final String langCode, final Authentication authentication) {
 

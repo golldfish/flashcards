@@ -34,7 +34,7 @@ public class UserService {
 
     @Transactional
     public void createNewUser(final UserDto userDto) {
-        userValidator.isRegisterUserValid(userDto);
+        userValidator.validateUserCreateParameters(userDto);
         userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
         userRepository.findUserByUsernameOrEmail(userDto.getUsername(), userDto.getEmail()).ifPresentOrElse(user -> {
             throw new ConflictException("User already exist");
@@ -47,9 +47,8 @@ public class UserService {
     @Transactional
     public void changePassword(final String username, final UserPasswordDto userPasswordDto) {
         final User user = userRepository.findUserByUsername(username).orElseThrow(() -> new NotFoundException("User not found"));
-        userValidator.comparePasswordToDb(userPasswordDto.getOldPassword(), user.getPassword());
-        userValidator.compareOldAndNewPassword(userPasswordDto.getOldPassword(), userPasswordDto.getPassword());
-        userValidator.validatePasswords(userPasswordDto.getPassword(), userPasswordDto.getRepeatPassword());
+        userValidator.validateChangePasswordParameters(userPasswordDto, user.getPassword());
+
         userPasswordDto.setPassword(passwordEncoder.encode(userPasswordDto.getPassword()));
         user.setPassword(userPasswordDto.getPassword());
         userRepository.save(user);

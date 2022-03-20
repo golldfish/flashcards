@@ -9,6 +9,7 @@ import com.example.flashcards.model.Language;
 import com.example.flashcards.repository.FlashcardRepository;
 import com.example.flashcards.repository.LanguageRepository;
 import com.example.flashcards.repository.UserRepository;
+import com.example.flashcards.validation.LanguageValidator;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ public class LanguageService {
     private final UserRepository userRepository;
     private final LanguageRepository languageRepository;
     private final FlashcardRepository flashcardRepository;
+    private final LanguageValidator languageValidator;
 
     @Transactional(readOnly = true)
     public List<LanguageDto> getLanguages(final String username) {
@@ -42,10 +44,7 @@ public class LanguageService {
 
     @Transactional
     public void createLanguage(final LanguageDto languageDto, final String username) {
-        //create validator
-        if (StringUtils.isBlank(languageDto.getLangCode()) || StringUtils.isBlank(languageDto.getName())) {
-            throw new BadRequestException("Invalid data");
-        }
+        languageValidator.validateLanguageParameters(languageDto, false);
 
         userRepository.findUserByUsername(username).orElseThrow(() -> new NotFoundException("User not found"));
 
@@ -65,10 +64,8 @@ public class LanguageService {
 
         final Language lang = languageRepository.findByLangCode(langCode).orElseThrow(() -> new NotFoundException("Language not found"));
 
-        //validator
-        if (StringUtils.isBlank(languageDto.getName())) {
-            throw new BadRequestException("invalid data");
-        }
+        languageValidator.validateLanguageParameters(languageDto, true);
+
         lang.setName(languageDto.getName());
         languageRepository.save(lang);
     }

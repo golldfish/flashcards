@@ -14,7 +14,7 @@ public interface FlashcardRepository extends JpaRepository<Flashcard, Integer> {
 
     List<Flashcard> findAllByUser(final User user);
 
-    Optional<Flashcard> findByQuestionValue(final String questionValue);
+    Optional<Flashcard> findByUserUsernameAndQuestionValue (final String username, final String questionValue);
 
     List<Flashcard> findAllByQuestionLanguageLangCode(final String langCode);
 

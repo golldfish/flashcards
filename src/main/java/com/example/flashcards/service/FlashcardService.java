@@ -11,6 +11,7 @@ import com.example.flashcards.model.User;
 import com.example.flashcards.repository.FlashcardRepository;
 import com.example.flashcards.repository.LanguageRepository;
 import com.example.flashcards.repository.UserRepository;
+import com.example.flashcards.validation.FlashcardValidator;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,7 @@ public class FlashcardService {
     private final FlashcardRepository flashcardRepository;
     private final UserRepository userRepository;
     private final LanguageRepository languageRepository;
+    private final FlashcardValidator flashcardValidator;
 
     @Transactional(readOnly = true)
     public List<FlashcardDto> getFlashcards(final String username) {
@@ -45,12 +47,8 @@ public class FlashcardService {
 
     @Transactional
     public void createFlashcard(final FlashcardDto flashcardDto, final String username) {
-        if (StringUtils.isBlank(flashcardDto.getQuestion().getValue()) ||
-            StringUtils.isBlank(flashcardDto.getQuestion().getLangCode()) ||
-            StringUtils.isBlank(flashcardDto.getAnswer().getValue()) ||
-            StringUtils.isBlank(flashcardDto.getAnswer().getLangCode())) {
-            throw new BadRequestException("invalid data");
-        }
+        flashcardValidator.validateFlashcardParameters(flashcardDto);
+
         final User user = userRepository.findUserByUsername(username).orElseThrow(() -> new NotFoundException("User not found"));
 
         List<Flashcard> flashcards = flashcardRepository.findAllByUser(user);
@@ -78,18 +76,12 @@ public class FlashcardService {
 
     @Transactional
     public void editFlashcard(final int id, final FlashcardDto flashcardDto, final String username) {
+        flashcardValidator.validateFlashcardParameters(flashcardDto);
         userRepository.findUserByUsername(username).orElseThrow(() -> new NotFoundException("User not found"));
 
         final Flashcard flashcard = flashcardRepository.findById(id).orElseThrow(()-> new NotFoundException("Flashcard not found"));
-        if (StringUtils.isBlank(flashcardDto.getQuestion().getValue()) ||
-                StringUtils.isBlank(flashcardDto.getQuestion().getLangCode()) ||
-                StringUtils.isBlank(flashcardDto.getAnswer().getValue()) ||
-                StringUtils.isBlank(flashcardDto.getAnswer().getLangCode())) {
-            throw new BadRequestException("invalid data");
-        }
 
-//change to find by question value and user
-        flashcardRepository.findByQuestionValue(flashcardDto.getQuestion().getValue()).ifPresent(f -> {
+        flashcardRepository.findByUserUsernameAndQuestionValue(username, flashcardDto.getQuestion().getValue()).ifPresent(f -> {
             throw new ConflictException("Flashcard with inputted question already exists");
         });
 
@@ -109,12 +101,14 @@ public class FlashcardService {
             } else {
                 throw new BadRequestException("Flashcard is used in quiz - cannot be deleted");
             }
-        }, ()->  throw new NotFoundException("Flashcard not found"););
+        }, () -> {
+            throw new NotFoundException("Flashcard not found");
+        });
     }
 
     @Transactional(readOnly = true)
     public List<FlashcardDto> sortFlashcards(final String questionLangCode, final String answerLangCode, final String username) {
-        final User user = userRepository.findUserByUsername(username).orElseThrow(NotFoundException::new);
+        final User user = userRepository.findUserByUsername(username).orElseThrow(() -> new NotFoundException("User not found"));
 
         if (StringUtils.isBlank(questionLangCode) && StringUtils.isBlank(answerLangCode)) {
             return flashcardRepository.findAllByUser(user).stream().map(FlashcardDto::createFrom).collect(Collectors.toList());
@@ -130,7 +124,7 @@ public class FlashcardService {
 
     @Transactional(readOnly = true)
     public List<FlashcardDto> searchFlashcards(final String questionLangCode, final String answerLangCode, final String questionQuery, final String username) {
-        final User user = userRepository.findUserByUsername(username).orElseThrow(NotFoundException::new);
+        final User user = userRepository.findUserByUsername(username).orElseThrow(() -> new NotFoundException("User not found"));
 
         if (StringUtils.isBlank(questionLangCode) && StringUtils.isBlank(answerLangCode)) {
             return flashcardRepository.findAllByUserAndQuestionContaining(user, questionQuery).stream().map(FlashcardDto::createFrom).collect(Collectors.toList());
@@ -143,6 +137,4 @@ public class FlashcardService {
                     .stream().map(FlashcardDto::createFrom).collect(Collectors.toList());
         }
     }
-
-
 }

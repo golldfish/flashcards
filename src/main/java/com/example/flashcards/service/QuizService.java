@@ -29,12 +29,11 @@ public class QuizService {
     private final UserRepository userRepository;
     private final QuizRepository quizRepository;
     private final QuizFlashcardsRepository quizFlashcardsRepository;
-    private final FlashcardService flashcardService;
     private final QuizValidator quizValidator;
 
     @Transactional(readOnly = true)
     public List<QuizDto> getAll(final String username) {
-        final User user = userRepository.findUserByUsername(username).orElseThrow(NotFoundException::new);
+        final User user = userRepository.findUserByUsername(username).orElseThrow(() -> new NotFoundException("User not found"));
         final List<Quiz> quizzes = quizRepository.findAllByUser(user);
         return quizzes.stream().map(QuizDto::createFrom).collect(Collectors.toList());
     }
@@ -43,10 +42,10 @@ public class QuizService {
     public void createQuiz(final QuizCreateDto quizCreateDto, final String username) {
         quizValidator.validateQuizCreateParameters(quizCreateDto);
 
-        final User user = userRepository.findUserByUsername(username).orElseThrow(NotFoundException::new);
+        final User user = userRepository.findUserByUsername(username).orElseThrow(() -> new NotFoundException("User not found"));
 
         final Set<Flashcard> flashcards = quizCreateDto.getFlashcardsId().stream()
-                .map(f -> flashcardRepository.findById(f).orElseThrow(NotFoundException::new))
+                .map(f -> flashcardRepository.findById(f).orElseThrow(() -> new NotFoundException("Flashcard not found")))
                 .peek(flashcard -> {
                     flashcard.setUsed(true);
                     flashcardRepository.save(flashcard);
@@ -69,9 +68,9 @@ public class QuizService {
     @Transactional
     public void editQuiz(final int id, final QuizEditDto quizEditDto, final String username) {
         quizValidator.validateQuizEditParameters(quizEditDto);
-        userRepository.findUserByUsername(username).orElseThrow(NotFoundException::new);
+        userRepository.findUserByUsername(username).orElseThrow(() -> new NotFoundException("User not found"));
 
-        final Quiz quiz = quizRepository.findById(id).orElseThrow(NotFoundException::new);
+        final Quiz quiz = quizRepository.findById(id).orElseThrow(() -> new NotFoundException("Quiz not found"));
 
         final Set<Integer> currentFlashcardsIds = quizFlashcardsRepository.findFlashcardsIdByQuizId(id);
         final Sets.SetView<Integer> flashcardsIdsToRemove = Sets.difference(currentFlashcardsIds, quizEditDto.getFlashcardsId());
@@ -84,14 +83,18 @@ public class QuizService {
                 flashcardRepository.save(qf.getFlashcard());
             }
             quizFlashcardsRepository.deleteById(qf.getId());
-        }, NotFoundException::new));
+        }, () -> {
+            throw new NotFoundException("Flashcard not found");
+        }));
 
         final List<QuizFlashcard> quizFlashcards = new ArrayList<>();
         flashcardsIdsToAdd.forEach(f -> flashcardRepository.findById(f).ifPresentOrElse(flashcard -> {
             flashcard.setUsed(true);
             flashcardRepository.save(flashcard);
             quizFlashcards.add(buildQuizFlashcard(quiz, flashcard));
-        }, NotFoundException::new));
+        }, () -> {
+            throw new NotFoundException("Flashcard not found");
+        }));
 
         quizFlashcardsRepository.saveAll(quizFlashcards);
         quiz.setName(quizEditDto.getName());
@@ -103,20 +106,20 @@ public class QuizService {
 
     @Transactional(readOnly = true)
     public QuizDetailsDto getQuizDetails(final int id, final String username) {
-        userRepository.findUserByUsername(username).orElseThrow(NotFoundException::new);
-        final Quiz quiz = quizRepository.findById(id).orElseThrow(NotFoundException::new);
+        userRepository.findUserByUsername(username).orElseThrow(() -> new NotFoundException("User not found"));
+        final Quiz quiz = quizRepository.findById(id).orElseThrow(() -> new NotFoundException("Quiz not found"));
         return QuizDetailsDto.createFrom(quiz, flashcardRepository.findAllByQuizId(id));
     }
 
     @Transactional
     public void solveQuiz(final Integer id, final List<QuizSolveDto> quizSolveDtos, final String username) {
         quizSolveDtos.forEach(quizValidator::validateQuizSolveParameters);
-        userRepository.findUserByUsername(username).orElseThrow(NotFoundException::new);
+        userRepository.findUserByUsername(username).orElseThrow(() -> new NotFoundException("User not found"));
 
-        final Quiz quiz = quizRepository.findById(id).orElseThrow(NotFoundException::new);
+        final Quiz quiz = quizRepository.findById(id).orElseThrow(() -> new NotFoundException("Quiz not found"));
 
         quizSolveDtos.forEach(qs -> {
-            final QuizFlashcard quizFlashcard = quizFlashcardsRepository.findByQuizIdAndFlashcardId(id, qs.getFlashcardId()).orElseThrow(NotFoundException::new);
+            final QuizFlashcard quizFlashcard = quizFlashcardsRepository.findByQuizIdAndFlashcardId(id, qs.getFlashcardId()).orElseThrow(() -> new NotFoundException("Flashcard for quiz not found"));
             quizFlashcard.setUserAnswer(qs.getUserAnswer());
             quizFlashcardsRepository.save(quizFlashcard);
         });
@@ -127,13 +130,13 @@ public class QuizService {
 
     @Transactional(readOnly = true)
     public QuizResultDto getResults(final int id, final String username) {
-        userRepository.findUserByUsername(username).orElseThrow(NotFoundException::new);
-        final Quiz quiz = quizRepository.findById(id).orElseThrow(NotFoundException::new);
+        userRepository.findUserByUsername(username).orElseThrow(() -> new NotFoundException("User not found"));
+        final Quiz quiz = quizRepository.findById(id).orElseThrow(() -> new NotFoundException("Quiz not found"));
         return QuizResultDto.createFrom(quiz, quizFlashcardsRepository.findByQuizId(id));
     }
 
     public void deleteQuizById(final int id, final String username) {
-        userRepository.findUserByUsername(username).orElseThrow(NotFoundException::new);
+        userRepository.findUserByUsername(username).orElseThrow(() -> new NotFoundException("User not found"));
 
         quizRepository.findById(id).ifPresentOrElse(quiz -> quiz.getQuizFlashcards().forEach(qf -> {
             if (quizFlashcardsRepository.findByFlashcardId(qf.getFlashcard().getId()).isEmpty()
@@ -142,7 +145,9 @@ public class QuizService {
                 flashcardRepository.save(qf.getFlashcard());
             }
             quizRepository.deleteById(id);
-        }), NotFoundException::new);
+        }), () -> {
+            throw new NotFoundException("Quiz not found");
+        });
     }
 
     private QuizFlashcard buildQuizFlashcard(final Quiz quiz, final Flashcard flashcard) {
