@@ -7,6 +7,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Set;
 
 @Builder
 @NoArgsConstructor
@@ -25,7 +26,6 @@ public class Quiz implements Serializable {
     @NotBlank
     private String name;
 
-    @Column(nullable = true)
     private Integer score;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -33,7 +33,7 @@ public class Quiz implements Serializable {
     private User user;
 
     @OneToMany(mappedBy = "quiz", fetch = FetchType.LAZY, orphanRemoval = true)
-    private List<QuizFlashcard> quizFlashcards;
+    private Set<QuizFlashcard> quizFlashcards;
 
 }
 

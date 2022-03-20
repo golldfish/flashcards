@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -55,10 +56,10 @@ public class QuizService {
         final Quiz quiz = Quiz.builder()
                 .name(quizCreateDto.getName())
                 .user(user)
-                .quizFlashcards(new ArrayList<>())
+                .quizFlashcards(new HashSet<>())
                 .build();
 
-        final List<QuizFlashcard> quizFlashcards = new ArrayList<>();
+        final Set<QuizFlashcard> quizFlashcards = new HashSet<>();
         flashcards.forEach(flashcard -> quizFlashcards.add(buildQuizFlashcard(quiz, flashcard)));
         quizFlashcardsRepository.saveAll(quizFlashcards);
         quiz.setQuizFlashcards(quizFlashcards);

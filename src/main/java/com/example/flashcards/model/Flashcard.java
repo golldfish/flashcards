@@ -5,7 +5,7 @@ import lombok.*;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
-import java.util.List;
+import java.util.Set;
 
 @Builder
 @NoArgsConstructor
@@ -39,5 +39,5 @@ public class Flashcard implements Serializable {
     private User user;
 
     @OneToMany(mappedBy = "flashcard", fetch = FetchType.LAZY, orphanRemoval = true)
-    private List<QuizFlashcard> quizFlashcards;
+    private Set<QuizFlashcard> quizFlashcards;
 }

@@ -1,14 +1,13 @@
 package com.example.flashcards.model;
 
 import lombok.*;
-//import org.checkerframework.common.aliasing.qual.Unique;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
-import java.util.List;
+import java.util.Set;
 
 @Builder
 @NoArgsConstructor
@@ -35,9 +34,9 @@ public class Language implements Serializable {
     private String name;
 
     @OneToMany(mappedBy = "language", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Answer> answer;
+    private Set<Answer> answer;
 
     @OneToMany(mappedBy = "language", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Question> questions;
+    private Set<Question> questions;
 
 }
