@@ -20,7 +20,10 @@ public class Flashcard implements Serializable {
     @Column(unique = true)
     private Integer id;
 
+    @Column(name = "is_used", nullable = false)
     private boolean isUsed;
+
+    @Column(name = "creation_date", nullable = false)
     private Date creationDate;
 
     @OneToOne(cascade = CascadeType.ALL)

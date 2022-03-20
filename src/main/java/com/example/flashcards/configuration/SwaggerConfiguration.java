@@ -12,7 +12,7 @@ import org.springframework.http.HttpHeaders;
 @SecurityScheme(
         name = "token",
         type = SecuritySchemeType.APIKEY,
-        scheme = "bearer",
+        scheme = "Bearer ",
         in = SecuritySchemeIn.HEADER, paramName = HttpHeaders.AUTHORIZATION
 )
 @OpenAPIDefinition(

@@ -17,7 +17,7 @@ import java.io.Serializable;
 public class Answer implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(unique = true)
+    @Column(nullable = false, unique = true)
     private Integer id;
 
     @NotBlank

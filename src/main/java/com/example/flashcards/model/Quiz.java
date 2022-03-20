@@ -25,6 +25,7 @@ public class Quiz implements Serializable {
     @NotBlank
     private String name;
 
+    @Column(nullable = true)
     private Integer score;
 
     @ManyToOne(fetch = FetchType.LAZY)

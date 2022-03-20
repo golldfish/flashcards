@@ -43,7 +43,7 @@ public class UserController {
             responses = {@ApiResponse(responseCode = "200", description = "Successfully logged in"),
                     @ApiResponse(responseCode = "400", description = "Email or password is not valid"),
                     @ApiResponse(responseCode = "404", description = "User not found")})
-    UserLoginDto createAuthenticationToken(@RequestBody JwtRequest request) throws Exception {
+    UserLoginDto createAuthenticationToken(@RequestBody JwtRequest request) {
 
         return userService.loginAndCreateToken(request);
     }

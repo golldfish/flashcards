@@ -18,17 +18,18 @@ public class JwtUserDetailsService implements UserDetailsService {
 
     final UserRepository userRepository;
 
-    public JwtUserDetailsService(UserRepository userRepository) {
+    public JwtUserDetailsService(final UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
     @Override
     public UserDetails loadUserByUsername(final String username) throws UsernameNotFoundException {
-        User user = getUser(username);
-        return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(), getAuthorities(user));
+        final User user = getUser(username);
+        return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(), getAuthorities(user)) {
+        };
     }
 
-    private Collection<? extends GrantedAuthority> getAuthorities(User user) {
+    private Collection<? extends GrantedAuthority> getAuthorities(final User user) {
         return List.of(new SimpleGrantedAuthority(user.getRole().toUpperCase(Locale.ROOT)));
     }
 

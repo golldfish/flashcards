@@ -22,6 +22,7 @@ public class Question implements Serializable {
 
     @NotNull
     @NotBlank
+    @Column(name = "value")
     private String value;
 
     @OneToOne(mappedBy = "question")

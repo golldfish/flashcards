@@ -5,6 +5,7 @@ import com.example.flashcards.dto.UserDetailsDto;
 import com.example.flashcards.dto.UserDto;
 import com.example.flashcards.dto.UserLoginDto;
 import com.example.flashcards.dto.UserPasswordDto;
+import com.example.flashcards.exception.BadRequestException;
 import com.example.flashcards.exception.ConflictException;
 import com.example.flashcards.exception.NotFoundException;
 import com.example.flashcards.model.User;
@@ -39,7 +40,7 @@ public class UserService {
         userRepository.findUserByUsernameOrEmail(userDto.getUsername(), userDto.getEmail()).ifPresentOrElse(user -> {
             throw new ConflictException("User already exist");
         }, () -> {
-            final User user = User.builder().username(userDto.getUsername()).email(userDto.getEmail()).password(userDto.getPassword()).build();
+            final User user = User.builder().username(userDto.getUsername()).email(userDto.getEmail()).password(userDto.getPassword()).role("USER").build();
             userRepository.save(user);
         });
     }
@@ -54,7 +55,7 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public UserLoginDto loginAndCreateToken(final JwtRequest authenticationRequest) throws Exception {
+    public UserLoginDto loginAndCreateToken(final JwtRequest authenticationRequest) {
         authenticate(authenticationRequest.getUsername(), authenticationRequest.getPassword());
         final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getUsername());
         final User user = userRepository.findUserByUsername(authenticationRequest.getUsername()).orElseThrow(() -> new NotFoundException("User not found"));
@@ -62,17 +63,17 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public UserDetailsDto getUserByUsername(final String username) throws NotFoundException {
+    public UserDetailsDto getUserByUsername(final String username){
         return UserDetailsDto.createFrom(userRepository.findUserByUsername(username).orElseThrow(() -> new NotFoundException("User not found")));
     }
 
-    private void authenticate(final String username, final String password) throws Exception {
+    private void authenticate(final String username, final String password) {
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
         } catch (DisabledException e) {
-            throw new Exception("USER_DISABLED", e);
+            throw new BadRequestException("USER_DISABLED");
         } catch (BadCredentialsException e) {
-            throw new Exception("INVALID_CREDENTIALS", e);
+            throw new BadRequestException("INVALID_CREDENTIALS");
         }
     }
 

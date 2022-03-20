@@ -19,23 +19,25 @@ public class User implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false, unique = true)
     private Integer id;
 
     @NotNull
     @NotBlank
-    @Column(unique = true)
+    @Column(name = "username", length = 32, unique = true)
     private String username;
 
     @NotNull
     @NotBlank
+    @Column(name = "password")
     private String password;
 
     @NotNull
     @NotBlank
-    @Column(unique = true)
+    @Column(name = "email", unique = true)
     private String email;
 
-    @Column(columnDefinition = "varchar(5) default 'user'")
+    @Column(name = "role")
     private String role;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, orphanRemoval = true)

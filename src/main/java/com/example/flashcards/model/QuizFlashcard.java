@@ -28,6 +28,7 @@ public class QuizFlashcard implements Serializable {
     @JoinColumn(name = "flashcard_id")
     private Flashcard flashcard;
 
+    @Column(name = "user_answer")
     private String userAnswer;
 }
 

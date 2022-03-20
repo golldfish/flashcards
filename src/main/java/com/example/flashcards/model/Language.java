@@ -23,14 +23,15 @@ public class Language implements Serializable {
     //@Unique
     private Integer id;
 
-    @Column(unique = true, name = "langCode")
+    @Column(name = "lang_code", unique = true, nullable = false)
     @NotNull
     @NotBlank
-    @Size(min = 2, max = 2)
+    @Size(min = 3, max = 3)
     private String langCode;
 
     @NotNull
     @NotBlank
+    @Column(name = "name")
     private String name;
 
     @OneToMany(mappedBy = "language", cascade = CascadeType.ALL, orphanRemoval = true)
