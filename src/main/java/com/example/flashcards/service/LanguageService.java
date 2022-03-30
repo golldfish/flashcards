@@ -48,7 +48,7 @@ public class LanguageService {
 
         userRepository.findUserByUsername(username).orElseThrow(() -> new NotFoundException("User not found"));
 
-        languageRepository.findAll().stream().map(Language::getName).filter(l -> l.equals(languageDto.getLangCode()))
+        languageRepository.findAll().stream().map(Language::getLangCode).filter(l -> l.equals(languageDto.getLangCode()))
                 .findFirst().ifPresentOrElse(lang -> {
                     throw new ConflictException("Language already exists");
                 }, () -> {
