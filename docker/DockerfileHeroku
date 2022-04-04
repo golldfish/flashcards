@@ -1,0 +1,12 @@
+FROM openjdk:11-jdk-slim AS build
+WORKDIR /app
+COPY .mvn/ .mvn
+COPY mvnw ./
+RUN chmod +x mvnw
+COPY pom.xml ./
+COPY src ./src
+RUN ./mvnw clean package -DskipTests
+
+FROM openjdk:11-jre-slim
+COPY --from=build /app/target/*.jar /app/flashcards.jar
+CMD java -Xmx300m -Xss512k -XX:CICompilerCount=2 -jar /app/retroboard.jar
