@@ -10,5 +10,5 @@ jobs:
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
       - uses: actions/checkout@v3
       - name: Build Docker image
-        run: .github/docker/gihubactions.sh
+        run: ./docker/gihubactions.sh
       - run: echo "🍏 This job's status is ${{ job.status }}."
