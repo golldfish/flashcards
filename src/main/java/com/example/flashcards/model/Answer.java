@@ -28,6 +28,6 @@ public class Answer implements Serializable {
     private Flashcard flashcard;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "langCode", referencedColumnName = "langCode")
+    @JoinColumn(name = "lang_code")
     private Language language;
 }
