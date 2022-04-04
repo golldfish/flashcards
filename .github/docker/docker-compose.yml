@@ -6,7 +6,7 @@ services:
       - db
     build:
       context: .
-      dockerfile: DockerfileGithubActions
+      dockerfile: docker/DockerfileGithubActions
     command: bash -c "./mvnw clean verify -Dspring.profiles.active=docker"
 
   db:
