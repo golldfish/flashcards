@@ -9,6 +9,6 @@ jobs:
     steps:
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
       - uses: actions/checkout@v2
-        name: Build Docker image
-          run: ./docker/test-gihubactions.sh
+      - name: Build Docker image
+        run: ./docker/test-gihubactions.sh
       - run: echo "🍏 This job's status is ${{ job.status }}."
