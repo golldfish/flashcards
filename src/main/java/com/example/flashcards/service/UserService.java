@@ -40,7 +40,12 @@ public class UserService {
         userRepository.findUserByUsernameOrEmail(userDto.getUsername(), userDto.getEmail()).ifPresentOrElse(user -> {
             throw new ConflictException("User already exist");
         }, () -> {
-            final User user = User.builder().username(userDto.getUsername()).email(userDto.getEmail()).password(userDto.getPassword()).role("USER").build();
+            final User user = User.builder()
+                    .username(userDto.getUsername())
+                    .email(userDto.getEmail())
+                    .password(userDto.getPassword())
+                    .role("USER")
+                    .build();
             userRepository.save(user);
         });
     }

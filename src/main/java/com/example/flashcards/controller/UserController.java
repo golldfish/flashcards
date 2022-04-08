@@ -66,7 +66,7 @@ public class UserController {
         return userService.getUserByUsername(authentication.getName());
     }
 
-    @DeleteMapping(value = "/user/delete")
+    @DeleteMapping(value = "/user")
     @ResponseStatus(OK)
     @Operation(security = @SecurityRequirement(name = "token"), summary = "Delete user",
             responses = {
