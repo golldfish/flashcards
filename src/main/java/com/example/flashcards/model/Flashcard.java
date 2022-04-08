@@ -26,11 +26,11 @@ public class Flashcard implements Serializable {
     @Column(name = "creation_date", nullable = false)
     private Date creationDate;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "question", referencedColumnName = "id")
     private Question question;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "answer", referencedColumnName = "id")
     private Answer answer;
 

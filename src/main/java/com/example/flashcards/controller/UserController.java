@@ -14,8 +14,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
-
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
 
@@ -66,5 +64,15 @@ public class UserController {
     UserDetailsDto getUserByUsername(final Authentication authentication) {
 
         return userService.getUserByUsername(authentication.getName());
+    }
+
+    @DeleteMapping(value = "/user/delete")
+    @ResponseStatus(OK)
+    @Operation(security = @SecurityRequirement(name = "token"), summary = "Delete user",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "User deleted")
+            })
+    void deleteUser(final Authentication authentication) {
+        userService.removeUser(authentication.getName());
     }
 }
