@@ -29,7 +29,7 @@ public class UserController {
     @Operation(summary = "Create user.",
             responses = {@ApiResponse(responseCode = "201", description = "User created"),
                     @ApiResponse(responseCode = "409", description = "User already exist", content = @Content),
-                    @ApiResponse(responseCode = "400", description = "Email, displayName or password not valid")})
+                    @ApiResponse(responseCode = "400", description = "Email, username or password not valid")})
     void create(@RequestBody UserDto userDto) {
 
         userService.createNewUser(userDto);
