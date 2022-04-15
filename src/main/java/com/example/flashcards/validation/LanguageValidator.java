@@ -43,7 +43,7 @@ public class LanguageValidator {
 
     private FieldError checkName(final String name) {
         if (StringUtils.isBlank(name) || name.length() > MAX_NAME_LENGTH || name.length() < MIN_NAME_LENGTH) {
-            final String message = "Name cannot be blank or null and must be in range 3-32 characters";
+            final String message = "Invalid language's name";
             return new FieldError("String", "name", name, false, null, null, message);
         } else {
             return null;
@@ -52,7 +52,7 @@ public class LanguageValidator {
 
     private FieldError checkLangCode(final String langCode) {
         if (StringUtils.isBlank(langCode) || langCode.length() != LANG_CODE_LENGTH) {
-            final String message = "Lang code cannot be blank or null and must have 3 characters";
+            final String message = "Invalid langCode";
             return new FieldError("String", "langCode", langCode, false, null, null, message);
         } else {
             return null;

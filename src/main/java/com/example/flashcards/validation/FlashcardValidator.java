@@ -41,7 +41,7 @@ public class FlashcardValidator {
 
     private FieldError checkValue(final String value) {
         if (StringUtils.isBlank(value) || value.length() > MAX_NAME_LENGTH || value.length() < MIN_NAME_LENGTH) {
-            final String message = "Name cannot be blank or null and must be in range 3-32 characters";
+            final String message = "Invalid flashcard's name";
             return new FieldError("String", "value", value, false, null, null, message);
         } else {
             return null;
@@ -50,7 +50,7 @@ public class FlashcardValidator {
 
     private FieldError checkLangCode(final String langCode) {
         if (StringUtils.isBlank(langCode) || langCode.length() != LANG_CODE_LENGTH) {
-            final String message = "Lang code cannot be blank or null and must have 3 characters";
+            final String message = "Invalid flashcard's langCode";
             return new FieldError("String", "langCode", langCode, false, null, null, message);
         } else {
             return null;

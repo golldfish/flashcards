@@ -64,7 +64,7 @@ public class UserValidator {
     private FieldError checkUsername(final String username) {
         if (StringUtils.isBlank(username) || username.length() > MAX_USERNAME_LENGTH || username.length() < MIN_USERNAME_LENGTH
                 || !(Pattern.compile(USERNAME_PATTERN).matcher(username).matches())) {
-            final String message = "Username cannot be blank or null and must be in range 3-32 characters";
+            final String message = "Invalid username";
             return new FieldError("String", "username", username, false, null, null, message);
         } else {
             return null;
@@ -73,7 +73,7 @@ public class UserValidator {
 
     private FieldError checkEmail(final String email) {
         if (StringUtils.isBlank(email) || !(Pattern.compile(EMAIL_PATTERN).matcher(email).matches())) {
-            final String message = "Email cannot be blank or null and must be in range 3-32 characters";
+            final String message = "Invalid email";
             return new FieldError("String", "email", email, false, null, null, message);
         } else {
             return null;
@@ -91,7 +91,7 @@ public class UserValidator {
                 new WhitespaceRule()));
 
         if (StringUtils.isBlank(password) || !(passwordValidator.validate(new PasswordData(password)).isValid())) {
-            final String message = "Password cannot be: blank or null and contains: 8-30 characters, 1 Upper case, 1 digit, 1 special character";
+            final String message = "Invalid password";
             return new FieldError("String", "password", password, false, null, null, message);
         } else {
             return null;
