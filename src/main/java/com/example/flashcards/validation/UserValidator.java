@@ -64,7 +64,7 @@ public class UserValidator {
     private FieldError checkUsername(final String username) {
         if (StringUtils.isBlank(username) || username.length() > MAX_USERNAME_LENGTH || username.length() < MIN_USERNAME_LENGTH
                 || !(Pattern.compile(USERNAME_PATTERN).matcher(username).matches())) {
-            final String message = "Name cannot be blank or null and must be in range 3-32 characters";
+            final String message = "Username cannot be blank or null and must be in range 3-32 characters";
             return new FieldError("String", "username", username, false, null, null, message);
         } else {
             return null;
