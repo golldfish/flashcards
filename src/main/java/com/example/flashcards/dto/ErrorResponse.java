@@ -4,7 +4,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.validation.FieldError;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Value
 @Builder
@@ -20,9 +24,9 @@ public class ErrorResponse {
                 .build();
     }
 
-    public static ErrorResponse buildErrorResponse(final FieldError fieldError) {
+    public static ErrorResponse buildErrorResponse(final List<FieldError> fieldErrors) {
         return ErrorResponse.builder()
-                .message(fieldError.getDefaultMessage())
+                .message(fieldErrors.stream().map(DefaultMessageSourceResolvable::getDefaultMessage).collect(Collectors.toList()).toString())
                 .build();
     }
 }

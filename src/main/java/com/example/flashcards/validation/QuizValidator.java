@@ -5,6 +5,7 @@ import com.example.flashcards.dto.quiz.QuizEditDto;
 import com.example.flashcards.dto.quiz.QuizSolveDto;
 import com.example.flashcards.exception.InvalidArgumentException;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.FieldError;
 
@@ -69,7 +70,7 @@ public class QuizValidator {
     }
 
     private FieldError checkName(final String name) {
-        if (nonNull(name) && (name.isBlank() || (name.length() > MAX_NAME_LENGTH || name.length() < MIN_NAME_LENGTH))) {
+        if (StringUtils.isBlank(name) || name.length() > MAX_NAME_LENGTH || name.length() < MIN_NAME_LENGTH) {
             final String message = "Name cannot be blank or null and must be in range 3-32 characters";
             return new FieldError("String", "name", name, false, null, null, message);
         } else {
@@ -78,7 +79,7 @@ public class QuizValidator {
     }
 
     private FieldError checkQuestionLangCode(final String langCode) {
-        if (nonNull(langCode) && (langCode.isBlank() || langCode.length() != LANG_CODE_LENGTH)) {
+        if (StringUtils.isBlank(langCode) || langCode.length() != LANG_CODE_LENGTH) {
             final String message = "Question lang code cannot be blank or null and must have 3 characters";
             return new FieldError("String", "questionLangCode", langCode, false, null, null, message);
         } else {
@@ -87,7 +88,7 @@ public class QuizValidator {
     }
 
     private FieldError checkAnswerLangCode(final String langCode) {
-        if (nonNull(langCode) && (langCode.isBlank() || langCode.length() != LANG_CODE_LENGTH)) {
+        if (StringUtils.isBlank(langCode) || langCode.length() != LANG_CODE_LENGTH) {
             final String message = "Answer lang code cannot be blank or null and must have 3 characters";
             return new FieldError("String", "answerLangCode", langCode, false, null, null, message);
         } else {
@@ -105,7 +106,7 @@ public class QuizValidator {
     }
 
     private FieldError checkFlashcardId(final Integer flashcardId) {
-        if (nonNull(flashcardId)) {
+        if (!nonNull(flashcardId)) {
             final String message = "Flashcard id needs to be provided.";
             return new FieldError("Integer", "flashcardId", flashcardId, false, null, null, message);
         } else {

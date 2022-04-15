@@ -6,11 +6,15 @@ import org.springframework.validation.FieldError;
 
 import java.util.List;
 
-@Getter
 @AllArgsConstructor
+@Getter
 public class InvalidArgumentException extends RuntimeException {
     private static final String DEFAULT_MESSAGE = "Invalid argument";
 
     private final List<FieldError> fieldErrors;
 
+//
+//    public InvalidArgumentException(final List<FieldError> fieldErrors) {
+//        this.fieldErrors = fieldErrors;
+//    }
 }

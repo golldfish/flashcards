@@ -3,6 +3,7 @@ package com.example.flashcards.validation;
 import com.example.flashcards.dto.flashcard.FlashcardDto;
 import com.example.flashcards.exception.InvalidArgumentException;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.FieldError;
 
@@ -12,8 +13,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static java.util.Objects.nonNull;
 
 @Component
 @RequiredArgsConstructor
@@ -41,7 +40,7 @@ public class FlashcardValidator {
     }
 
     private FieldError checkValue(final String value) {
-        if (nonNull(value) && (value.isBlank() || (value.length() > MAX_NAME_LENGTH || value.length() < MIN_NAME_LENGTH))) {
+        if (StringUtils.isBlank(value) || value.length() > MAX_NAME_LENGTH || value.length() < MIN_NAME_LENGTH) {
             final String message = "Name cannot be blank or null and must be in range 3-32 characters";
             return new FieldError("String", "value", value, false, null, null, message);
         } else {
@@ -50,7 +49,7 @@ public class FlashcardValidator {
     }
 
     private FieldError checkLangCode(final String langCode) {
-        if (nonNull(langCode) && (langCode.isBlank() || langCode.length() != LANG_CODE_LENGTH)) {
+        if (StringUtils.isBlank(langCode) || langCode.length() != LANG_CODE_LENGTH) {
             final String message = "Lang code cannot be blank or null and must have 3 characters";
             return new FieldError("String", "langCode", langCode, false, null, null, message);
         } else {
