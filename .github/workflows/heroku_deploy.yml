@@ -21,6 +21,6 @@ jobs:
           heroku_app_name: ${{secrets.HEROKU_APP_NAME}}
           email: ${{secrets.HEROKU_EMAIL}}
           dockerfile_directory: ./
-          dockerfile_name: ./docker/DockerfileHeroku
+          dockerfile_name: ./DockerfileHeroku
           docker_options: "--no-cache"
           process_type: web
