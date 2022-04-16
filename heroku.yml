@@ -2,4 +2,4 @@ build:
   docker:
     web: DockerfileHeroku
 run:
-  web: bundle exec puma -C config/puma.rb
+  web:  /bin/sh -c bundle\ exec\ puma\ -C\ config/puma.rb
