@@ -54,10 +54,10 @@ public class UserValidator {
     private List<FieldError> getFieldErrors(final UserPasswordDto userPasswordDto, final String dbPassword) {
 
         return Optional.ofNullable(userPasswordDto).map(ud -> Stream.of(
-                        checkPasswordWithDb(ud.getOldPassword(), dbPassword),
-                        checkOldAndNewPasswordsEquals(ud.getOldPassword(), ud.getPassword()),
                         checkPasswordAndRepeatPassword(ud.getPassword(), ud.getRepeatPassword()),
-                        checkPassword(ud.getPassword()))
+                        checkPassword(ud.getPassword()),
+                        checkPasswordWithDb(ud.getOldPassword(), dbPassword),
+                        checkOldAndNewPasswordsEquals(ud.getOldPassword(), ud.getPassword()))
                 .filter(Objects::nonNull).collect(Collectors.toList())).orElse(Collections.emptyList());
     }
 
