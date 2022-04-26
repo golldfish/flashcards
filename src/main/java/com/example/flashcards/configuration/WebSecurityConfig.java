@@ -43,7 +43,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(final HttpSecurity http) throws Exception {
         http.csrf().disable();
         http.authorizeRequests().antMatchers("/api/v1/register", "/api/v1/login", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                .antMatchers("/api/admin/**").hasAuthority("ADMIN").anyRequest().authenticated().and()
+                .antMatchers("/api/v1/admin/**").hasAuthority("ADMIN").anyRequest().authenticated().and()
                 .exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
