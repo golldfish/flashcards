@@ -43,7 +43,7 @@ public class LanguageValidator {
 
     private FieldError checkName(final String name) {
         if (StringUtils.isBlank(name) || name.length() > MAX_NAME_LENGTH || name.length() < MIN_NAME_LENGTH) {
-            final String message = "Invalid language's name";
+            final String message = "Invalid name";
             return new FieldError("String", "name", name, false, null, null, message);
         } else {
             return null;

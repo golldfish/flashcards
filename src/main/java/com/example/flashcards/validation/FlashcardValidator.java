@@ -41,7 +41,7 @@ public class FlashcardValidator {
 
     private FieldError checkValue(final String value) {
         if (StringUtils.isBlank(value) || value.length() > MAX_NAME_LENGTH || value.length() < MIN_NAME_LENGTH) {
-            final String message = "Invalid flashcard's name";
+            final String message = "Invalid name";
             return new FieldError("String", "value", value, false, null, null, message);
         } else {
             return null;
@@ -50,7 +50,7 @@ public class FlashcardValidator {
 
     private FieldError checkLangCode(final String langCode) {
         if (StringUtils.isBlank(langCode) || langCode.length() != LANG_CODE_LENGTH) {
-            final String message = "Invalid flashcard's langCode";
+            final String message = "Invalid langCode";
             return new FieldError("String", "langCode", langCode, false, null, null, message);
         } else {
             return null;
