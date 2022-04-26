@@ -108,7 +108,7 @@ public class UserValidator {
     }
 
     private FieldError checkPasswordWithDb(final String password, final String dbPassword) {
-        if (!BCrypt.checkpw(password, dbPassword)) {
+        if (StringUtils.isBlank(password) || !BCrypt.checkpw(password, dbPassword)) {
             final String message = "Wrong password";
             return new FieldError("String", "password", password, false, null, null, message);
         } else {
