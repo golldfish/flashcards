@@ -48,9 +48,9 @@ public class FlashcardController {
                     @ApiResponse(responseCode = "400", description = "Invalid data"),
                     @ApiResponse(responseCode = "404", description = "Language/User not found"),
                     @ApiResponse(responseCode = "409", description = "Flashcard with inputted question already exists")})
-    void createFlashcard(@RequestBody final FlashcardDto flashcardDto, final Authentication authentication) {
+    FlashcardDto createFlashcard(@RequestBody final FlashcardDto flashcardDto, final Authentication authentication) {
 
-        flashcardsService.createFlashcard(flashcardDto, authentication.getName());
+        return flashcardsService.createFlashcard(flashcardDto, authentication.getName());
     }
 
     @PutMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)

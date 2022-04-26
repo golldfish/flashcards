@@ -46,7 +46,7 @@ public class FlashcardService {
     }
 
     @Transactional
-    public void createFlashcard(final FlashcardDto flashcardDto, final String username) {
+    public FlashcardDto createFlashcard(final FlashcardDto flashcardDto, final String username) {
         flashcardValidator.validateFlashcardParameters(flashcardDto);
 
         final User user = userRepository.findUserByUsername(username).orElseThrow(() -> new NotFoundException("User not found"));
@@ -71,6 +71,8 @@ public class FlashcardService {
                 .creationDate(new Timestamp(System.currentTimeMillis())).build();
 
         flashcardRepository.save(flashcard);
+
+        return FlashcardDto.createFrom(flashcard);
 
     }
 
