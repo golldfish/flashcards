@@ -14,8 +14,6 @@ import java.util.Set;
 public class QuizCreateDto {
 
     String name;
-    String questionLangCode;
-    String answerLangCode;
     Set<Integer> flashcardsId;
 
 }

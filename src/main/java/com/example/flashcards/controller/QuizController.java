@@ -36,9 +36,9 @@ public class QuizController {
             responses = {@ApiResponse(responseCode = "201", description = "Created"),
                     @ApiResponse(responseCode = "400", description = "Invalid data"),
                     @ApiResponse(responseCode = "404", description = "Flashcard/User not found")})
-    void newQuiz(@RequestBody final QuizCreateDto quizCreateDto, final Authentication authentication) {
+    String newQuiz(@RequestBody final QuizCreateDto quizCreateDto, final Authentication authentication) {
 
-        quizService.createQuiz(quizCreateDto, authentication.getName());
+        return quizService.createQuiz(quizCreateDto, authentication.getName());
     }
 
     @PutMapping(value = "/{id}/edit", produces = MediaType.APPLICATION_JSON_VALUE)

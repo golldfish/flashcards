@@ -16,10 +16,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -40,7 +37,7 @@ public class QuizService {
     }
 
     @Transactional
-    public void createQuiz(final QuizCreateDto quizCreateDto, final String username) {
+    public String createQuiz(final QuizCreateDto quizCreateDto, final String username) {
         quizValidator.validateQuizCreateParameters(quizCreateDto);
 
         final User user = userRepository.findUserByUsername(username).orElseThrow(() -> new NotFoundException("User not found"));
@@ -64,6 +61,8 @@ public class QuizService {
         quizFlashcardsRepository.saveAll(quizFlashcards);
         quiz.setQuizFlashcards(quizFlashcards);
         quizRepository.save(quiz);
+
+        return Objects.requireNonNull(new HashMap<String, Integer>().put("id", quiz.getId())).toString();
     }
 
     @Transactional
