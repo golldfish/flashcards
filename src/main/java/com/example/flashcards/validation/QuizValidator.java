@@ -50,8 +50,6 @@ public class QuizValidator {
     private List<FieldError> getFieldErrors(final QuizCreateDto quizCreateDto) {
 
         return Optional.ofNullable(quizCreateDto).map(quizCreate -> Stream.of(checkName(quizCreate.getName()),
-                        checkQuestionLangCode(quizCreate.getQuestionLangCode()),
-                        checkAnswerLangCode(quizCreate.getAnswerLangCode()),
                         checkFlashcardsId(quizCreate.getFlashcardsId()))
                 .filter(Objects::nonNull).collect(Collectors.toList())).orElse(Collections.emptyList());
     }
@@ -73,24 +71,6 @@ public class QuizValidator {
         if (StringUtils.isBlank(name) || name.length() > MAX_NAME_LENGTH || name.length() < MIN_NAME_LENGTH) {
             final String message = "Invalid quiz name";
             return new FieldError("String", "name", name, false, null, null, message);
-        } else {
-            return null;
-        }
-    }
-
-    private FieldError checkQuestionLangCode(final String langCode) {
-        if (StringUtils.isBlank(langCode) || langCode.length() != LANG_CODE_LENGTH) {
-            final String message = "Invalid question langCode";
-            return new FieldError("String", "questionLangCode", langCode, false, null, null, message);
-        } else {
-            return null;
-        }
-    }
-
-    private FieldError checkAnswerLangCode(final String langCode) {
-        if (StringUtils.isBlank(langCode) || langCode.length() != LANG_CODE_LENGTH) {
-            final String message = "Invalid answer langCode";
-            return new FieldError("String", "answerLangCode", langCode, false, null, null, message);
         } else {
             return null;
         }
