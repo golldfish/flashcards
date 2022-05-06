@@ -1,8 +1,6 @@
 package com.example.flashcards.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
@@ -12,6 +10,8 @@ import java.io.Serializable;
 @Embeddable
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
+@Setter
 public class QuizFlashcardsKey implements Serializable {
 
     @Column(name="quiz_id", nullable = false)

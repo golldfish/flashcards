@@ -12,9 +12,7 @@ import java.util.Set;
 @Builder
 @RequiredArgsConstructor
 public class QuizCreateDto {
-
     String name;
     Set<Integer> flashcardsId;
-
 }
 
