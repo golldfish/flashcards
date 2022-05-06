@@ -77,7 +77,7 @@ public class QuizValidator {
     }
 
     private FieldError checkFlashcardsId(final Set<Integer> flashcardsId) {
-        if (flashcardsId.isEmpty()) {
+        if (flashcardsId == null || flashcardsId.isEmpty()) {
             final String message = "Flashcards ids needs to be provided.";
             return new FieldError("String", "flashcardsId", flashcardsId, false, null, null, message);
         } else {
