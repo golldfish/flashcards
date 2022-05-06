@@ -2,10 +2,7 @@ package com.example.flashcards.service;
 
 import com.example.flashcards.dto.quiz.*;
 import com.example.flashcards.exception.NotFoundException;
-import com.example.flashcards.model.Flashcard;
-import com.example.flashcards.model.Quiz;
-import com.example.flashcards.model.QuizFlashcard;
-import com.example.flashcards.model.User;
+import com.example.flashcards.model.*;
 import com.example.flashcards.repository.FlashcardRepository;
 import com.example.flashcards.repository.QuizFlashcardsRepository;
 import com.example.flashcards.repository.QuizRepository;
@@ -37,7 +34,7 @@ public class QuizService {
     }
 
     @Transactional
-    public String createQuiz(final QuizCreateDto quizCreateDto, final String username) {
+    public QuizDto createQuiz(final QuizCreateDto quizCreateDto, final String username) {
         quizValidator.validateQuizCreateParameters(quizCreateDto);
 
         final User user = userRepository.findUserByUsername(username).orElseThrow(() -> new NotFoundException("User not found"));
@@ -55,6 +52,7 @@ public class QuizService {
                 .user(user)
                 .quizFlashcards(new HashSet<>())
                 .build();
+        quizRepository.save(quiz);
 
         final Set<QuizFlashcard> quizFlashcards = new HashSet<>();
         flashcards.forEach(flashcard -> quizFlashcards.add(buildQuizFlashcard(quiz, flashcard)));
@@ -62,7 +60,7 @@ public class QuizService {
         quiz.setQuizFlashcards(quizFlashcards);
         quizRepository.save(quiz);
 
-        return Objects.requireNonNull(new HashMap<String, Integer>().put("id", quiz.getId())).toString();
+        return QuizDto.createFrom(quiz);
     }
 
     @Transactional
@@ -152,6 +150,7 @@ public class QuizService {
 
     private QuizFlashcard buildQuizFlashcard(final Quiz quiz, final Flashcard flashcard) {
         return QuizFlashcard.builder()
+                .id(new QuizFlashcardsKey(quiz.getId(), flashcard.getId()))
                 .quiz(quiz)
                 .flashcard(flashcard)
                 .userAnswer(null)

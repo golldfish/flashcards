@@ -2,15 +2,13 @@ package com.example.flashcards.repository;
 
 import com.example.flashcards.model.QuizFlashcard;
 import com.example.flashcards.model.QuizFlashcardsKey;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.CrudRepository;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-public interface QuizFlashcardsRepository extends JpaRepository<QuizFlashcard, Integer> {
+public interface QuizFlashcardsRepository extends CrudRepository<QuizFlashcard, QuizFlashcardsKey> {
 
     Set<QuizFlashcard> findByQuizId(final Integer id);
 

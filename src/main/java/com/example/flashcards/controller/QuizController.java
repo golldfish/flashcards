@@ -36,7 +36,7 @@ public class QuizController {
             responses = {@ApiResponse(responseCode = "201", description = "Created"),
                     @ApiResponse(responseCode = "400", description = "Invalid data"),
                     @ApiResponse(responseCode = "404", description = "Flashcard/User not found")})
-    String newQuiz(@RequestBody final QuizCreateDto quizCreateDto, final Authentication authentication) {
+    QuizDto newQuiz(@RequestBody final QuizCreateDto quizCreateDto, final Authentication authentication) {
 
         return quizService.createQuiz(quizCreateDto, authentication.getName());
     }
