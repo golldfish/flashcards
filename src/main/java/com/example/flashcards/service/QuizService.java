@@ -141,11 +141,11 @@ public class QuizService {
                     || quizFlashcardsRepository.findByFlashcardId(qf.getFlashcard().getId()).contains(qf)) {
                 qf.getFlashcard().setUsed(false);
                 flashcardRepository.save(qf.getFlashcard());
-            }
-            quizRepository.deleteById(id);
-        }), () -> {
+            }}), () -> {
             throw new NotFoundException("Quiz not found");
         });
+        quizRepository.deleteById(id);
+
     }
 
     private QuizFlashcard buildQuizFlashcard(final Quiz quiz, final Flashcard flashcard) {
